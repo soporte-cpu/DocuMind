@@ -16,7 +16,7 @@ services:
       # Persistencia de transcripciones de audio/video
       - ./transcripts:/app/transcripts
       # Persistencia de la Base de Datos SQLite (Historial y Configuración)
-      - ./documind.db:/app/documind.db
+      - ./data:/app/data
     restart: always
 
 networks:
