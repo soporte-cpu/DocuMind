@@ -68,6 +68,14 @@ OPENAI_API_KEY=tu_clave_aqui
 ```bash
 uvicorn backend.main:app --reload
 ```
+
+### 🐳 Despliegue con Docker (Recomendado)
+Para un despliegue rápido y persistente que incluya la base de datos y todos los archivos:
+
+```bash
+docker-compose up -d --build
+```
+Esto levantará el contenedor con volúmenes persistentes para `docs/`, `embeddings/` y la base de datos `documind.db`.
 La aplicación estará disponible en `http://localhost:8000`.
 
 ## 📖 Uso de la API
