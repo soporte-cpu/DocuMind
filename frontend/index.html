@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocuMind Enterprise</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <nav class="nav-rail">
+        <div class="nav-item active" onclick="switchView('chat')" title="Chat">💬</div>
+        <div class="nav-item" onclick="switchView('knowledge')" title="Gestión">📁</div>
+        <div style="margin-top: auto;" class="nav-item">🚪</div>
+    </nav>
+
+    <div class="view-container">
+        <!-- CHAT VIEW -->
+        <div id="view-chat" class="view active">
+            <aside class="sidebar">
+                <div class="sidebar-top">
+                    <div class="logo-wrapper">
+                        <div class="logo-box">D</div>
+                        <span class="logo-text">ocuMind</span>
+                    </div>
+                    <button class="new-chat-btn" id="new-chat-btn">+ Nueva Consulta</button>
+                </div>
+
+                <div class="history-container" id="history-container"></div>
+
+                <div class="sidebar-bottom">
+                    <div class="area-config-box">
+                        <span class="label-tiny">CONTEXTO DE BÚSQUEDA</span>
+                        <select class="professional-select" id="chat-area-selector">
+                            <option value="">🏢 Todas las Áreas</option>
+                        </select>
+                    </div>
+                </div>
+            </aside>
+
+            <main class="chat-main">
+                <header class="chat-header">
+                    <div class="header-info">
+                        <h2>Asistente Inteligente</h2>
+                        <div class="badge-status">● En línea</div>
+                    </div>
+                </header>
+                <div class="chat-viewport" id="chat-box"></div>
+                <div class="chat-input-area">
+                    <div class="input-wrapper">
+                        <textarea id="user-input" rows="1" placeholder="Haz una consulta profesional..."></textarea>
+                        <button class="send-btn" id="send-btn">↗</button>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- KNOWLEDGE VIEW -->
+        <div id="view-knowledge" class="view">
+            <aside class="k-sidebar">
+                <div class="k-sidebar-header">
+                    <h3>Espacios</h3>
+                    <button class="btn-icon" onclick="openCreateAreaModal()">+</button>
+                </div>
+                <div class="area-list" id="k-area-list"></div>
+            </aside>
+            <main class="k-main">
+                <header class="k-header">
+                    <div class="k-area-info">
+                        <span id="current-area-icon" class="big-icon">📁</span>
+                        <div>
+                            <h2 id="current-area-name">Área</h2>
+                            <p class="text-muted">Gestión de documentos técnicos</p>
+                        </div>
+                    </div>
+                    <div class="k-header-actions">
+                        <div class="search-input-wrapper">
+                            <span>🔍</span>
+                            <input type="text" id="file-search" placeholder="Filtrar archivos...">
+                        </div>
+                        <button class="btn-primary" onclick="document.getElementById('file-upload').click()">Subir
+                            Archivos</button>
+                        <button class="btn-ghost" style="border:1px solid var(--border); border-radius:8px;"
+                            onclick="document.getElementById('folder-upload').click()">📁 Cargar Carpeta</button>
+                    </div>
+                    <input type="file" id="file-upload" multiple hidden onchange="uploadToCurrentArea(this.files)">
+                    <input type="file" id="folder-upload" webkitdirectory directory multiple hidden
+                        onchange="uploadToCurrentArea(this.files)">
+                </header>
+                <div class="k-grid" id="k-file-grid"></div>
+
+                <!-- Panel de Estado/Progreso -->
+                <div id="upload-progress-panel" class="progress-panel">
+                    <div class="progress-header">
+                        <span id="progress-status-text">Subiendo archivos...</span>
+                        <span class="progress-spinner"></span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div id="progress-bar-fill" class="progress-bar-fill" style="width: 0%"></div>
+                    </div>
+                    <div id="progress-file-list" class="progress-file-list"></div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-bg" id="area-modal">
+        <div class="modal-card">
+            <h3 id="area-modal-title">Gestión de Área</h3>
+            <div class="form-group">
+                <label>Nombre</label>
+                <input type="text" id="area-name-input">
+            </div>
+            <div class="form-group">
+                <label>Icono (Emoji)</label>
+                <input type="text" id="area-icon-input" value="📁">
+            </div>
+            <div class="modal-footer">
+                <button class="btn-ghost" onclick="closeAreaModal()">Cancelar</button>
+                <button class="btn-primary" id="area-save-btn" onclick="saveArea()">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

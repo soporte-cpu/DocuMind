@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+
+# Configuración Sensible
+.env
+
+# Base de datos y Almacenamiento
+documind.db
+embeddings/
+transcripts/
+docs/*
+!docs/.gitkeep
+
+# IDEs
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
