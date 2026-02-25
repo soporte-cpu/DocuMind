@@ -8,15 +8,18 @@ ENV PYTHONUNBUFFERED 1
 # Directorio de trabajo dentro del contenedor
 WORKDIR /app
 
-# Instala dependencias del sistema necesarias (build-essential para faiss-cpu y otros)
+# Instala dependencias del sistema necesarias
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libmagic1 \
+    gcc \
+    python3-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Copia el archivo de requerimientos e instala las librerías
+# Copia el archivo de requerimientos e instala las librerías con log detallado
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt -v
 
 # Copia todo el contenido del proyecto al contenedor
 COPY . .
