@@ -10,14 +10,20 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
     volumes:
       # Persistencia de documentos subidos
-      - ./docs:/app/docs
+      - documind_docs:/app/docs
       # Persistencia de los índices de la IA (Vectores)
-      - ./embeddings:/app/embeddings
+      - documind_embeddings:/app/embeddings
       # Persistencia de transcripciones de audio/video
-      - ./transcripts:/app/transcripts
+      - documind_transcripts:/app/transcripts
       # Persistencia de la Base de Datos SQLite (Historial y Configuración)
-      - ./data:/app/data
+      - documind_data:/app/data
     restart: always
+
+volumes:
+  documind_docs:
+  documind_embeddings:
+  documind_transcripts:
+  documind_data:
 
 networks:
   default:
