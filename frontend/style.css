@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700&display=swap');
+﻿@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700&display=swap');
 
 :root {
     --primary: #2563eb;
@@ -54,13 +54,45 @@ body {
 
 .login-card {
     background: white;
-    width: 400px;
-    padding: 48px;
-    border-radius: 24px;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    width: 450px;
+    padding: 56px;
+    border-radius: 32px;
+    box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.4);
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+}
+
+.form-group label {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 16px 20px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 14px;
+    outline: none;
+    background: #f8fafc;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+}
+
+.form-group input:focus {
+    border-color: var(--primary);
+    background: white;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
 }
 
 .login-card .logo-wrapper.large {
@@ -361,84 +393,105 @@ body {
 
 .message-bubble {
     width: 100%;
-    max-width: 850px;
+    max-width: 950px;
     margin: 0 auto 32px auto;
-    padding: 0 24px;
+    padding: 0 32px;
     display: flex;
-    gap: 16px;
+    gap: 20px;
+    animation: fadeIn 0.4s ease;
 }
 
+/* AI LEFT STYLING */
+.message-bubble.assistant {
+    flex-direction: row;
+    justify-content: flex-start;
+}
+
+/* USER RIGHT STYLING - PINNED TO RIGHT */
 .message-bubble.user {
     flex-direction: row-reverse;
+    justify-content: flex-start;
 }
 
 .bubble-avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
     flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.75rem;
+    font-size: 0.65rem;
     font-weight: 800;
     font-family: 'Outfit';
 }
 
 .assistant .bubble-avatar {
-    background: var(--primary);
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
     color: white;
 }
 
 .user .bubble-avatar {
-    background: #e2e8f0;
-    color: #475569;
-    border: 1px solid #cbd5e1;
+    background: #475569;
+    color: white;
 }
 
 .bubble-content {
-    background: white;
-    border: 1px solid var(--border);
-    padding: 18px 24px;
-    border-radius: 16px;
-    border-top-left-radius: 4px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+    max-width: 70%;
+    /* Ancho adaptativo para burbujas reales */
     line-height: 1.6;
-    font-size: 1rem;
+    font-size: 0.98rem;
+    padding: 16px 20px;
+    border-radius: 20px;
+}
+
+.assistant .bubble-content {
+    background: white;
     color: #1e293b;
-    max-width: 80%;
+    border: 1px solid var(--border);
+    border-top-left-radius: 4px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
 }
 
 .user .bubble-content {
     background: var(--primary);
-    color: white !important;
-    border: none;
-    border-top-left-radius: 16px;
+    color: white;
     border-top-right-radius: 4px;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.15);
+    text-align: left;
+}
+
+.source-container {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
 }
 
 .source-tag {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    background: #f1f5f9;
+    gap: 8px;
+    background: white;
     border: 1px solid #e2e8f0;
-    color: #64748b;
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-size: 0.72rem;
-    font-weight: 600;
+    color: #475569;
+    padding: 6px 14px;
+    border-radius: 10px;
+    font-size: 0.78rem;
+    font-weight: 700;
     cursor: pointer;
-    transition: 0.2s;
-    margin-top: 4px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
 }
 
 .source-tag:hover {
-    background: #e2e8f0;
+    background: var(--primary-light);
     color: var(--primary);
     border-color: var(--primary);
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
 }
 
 .chat-input-area {
@@ -884,117 +937,334 @@ textarea#user-input {
     background: rgba(15, 23, 42, 0.5);
     backdrop-filter: blur(8px);
     display: none;
+}
+
+.file-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--primary);
+    box-shadow: 0 10px 20px -10px rgba(0, 0, 0, 0.05);
+}
+
+.file-icon-box {
+    width: 60px;
+    height: 78px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.file-tag {
+    position: absolute;
+    bottom: 6px;
+    font-size: 0.65rem;
+    font-weight: 800;
+    background: #64748b;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    font-family: 'Outfit';
+}
+
+.file-name {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #1e293b;
+    word-break: break-all;
+    line-height: 1.3;
+}
+
+/* =========================================
+   USER MANAGEMENT (THE ICONS FIX)
+   ========================================= */
+.users-table-container {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-top: 32px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.pro-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.pro-table th {
+    background: #f8fafc;
+    padding: 20px 24px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: #64748b;
+    text-transform: uppercase;
+    border-bottom: 2px solid #f1f5f9;
+}
+
+.pro-table td {
+    padding: 20px 24px;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 0.95rem;
+    color: #475569;
+}
+
+.pro-table tr:hover {
+    background: #fcfcfd;
+}
+
+.status-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 8px;
+}
+
+.status-indicator.active {
+    background: #10b981;
+}
+
+.status-indicator.inactive {
+    background: #ef4444;
+}
+
+.user-avatar-small {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: #eff6ff;
+    color: #2563eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.role-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+}
+
+.role-badge.admin {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.role-badge.viewer {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.btn-icon-sm {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    cursor: pointer;
+    transition: 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    color: #475569;
+    padding: 0;
+    line-height: 1;
+}
+
+.btn-icon-sm:hover {
+    border-color: var(--primary);
+    background: #f8fafc;
+    color: var(--primary);
+}
+
+/* =========================================
+   MODALS & ELEMENTS
+   ========================================= */
+.btn-primary {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s;
+    font-size: 0.95rem;
+}
+
+.btn-primary:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+.btn-ghost {
+    padding: 12px 20px;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    color: #475569;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-ghost:hover {
+    background: #e2e8f0;
+}
+
+.modal-bg {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.5);
+    backdrop-filter: blur(8px);
+    display: none;
     align-items: center;
     justify-content: center;
     z-index: 6000;
 }
 
+/* =========================================
+   ESTRUCTURA DE MODAL PRO (STIKY CONTROLS)
+   ========================================= */
 .modal-card {
     background: white;
     width: 100%;
-    max-width: 520px;
-    padding: 48px;
-    border-radius: 24px;
-    box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.2);
+    max-width: 950px;
+    padding: 0;
+    /* Quitamos padding general para control total */
+    border-radius: 28px;
+    box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.3);
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    /* El scroll será interno */
 }
 
-.form-group label {
-    display: block;
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: #475569;
-    text-transform: uppercase;
-    margin-bottom: 12px;
+.modal-header-pro {
+    padding: 32px 40px 24px 40px;
+    flex-shrink: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
 }
 
-.form-group input {
-    width: 100%;
-    padding: 14px 18px;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    outline: none;
-    background: #f8fafc;
-    font-size: 1rem;
+.modal-tabs {
+    padding: 0 40px;
+    background: #fff;
+    flex-shrink: 0;
+    z-index: 10;
 }
 
-.form-group input:focus {
-    border-color: var(--primary);
-    background: white;
+.source-viewer {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 40px;
+    min-height: 0;
+    /* Crucial para flex scroll */
+}
+
+/* Scrollbar Personalizada Técnica */
+.source-viewer::-webkit-scrollbar {
+    width: 8px;
+}
+
+.source-viewer::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+.source-viewer::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+.source-viewer::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+}
+
+.document-page {
+    background: #fdfdfd;
+    padding: 40px 0;
+    /* Padding vertical solo */
+    line-height: 1.8;
+    font-size: 0.95rem;
+    color: #1e293b;
+    white-space: pre-wrap;
+    font-family: 'Inter', sans-serif;
 }
 
 .modal-footer {
-    margin-top: 40px;
+    padding: 24px 40px 32px 40px;
+    flex-shrink: 0;
+    border-top: 1px solid var(--border);
     display: flex;
     justify-content: flex-end;
-    gap: 16px;
+    background: #fff;
 }
 
-.full-width {
-    width: 100%;
+/* Clases de utilidad */
+.source-modal-tabs {
+    display: flex;
+    gap: 32px;
+    border-bottom: 2px solid var(--border);
 }
 
-.error-text {
-    color: #ef4444;
-    font-size: 0.88rem;
-    text-align: center;
-    margin-top: 12px;
+.source-tab-btn {
+    padding: 16px 4px;
+    font-size: 1rem;
 }
- / *   P r o g r e s s   P a n e l   * / 
- . u p l o a d - p r o g r e s s - p a n e l   { 
-         p o s i t i o n :   f i x e d ; 
-         b o t t o m :   3 0 p x ; 
-         r i g h t :   3 0 p x ; 
-         w i d t h :   3 2 0 p x ; 
-         b a c k g r o u n d :   r g b a ( 2 5 5 ,   2 5 5 ,   2 5 5 ,   0 . 9 5 ) ; 
-         b a c k d r o p - f i l t e r :   b l u r ( 1 0 p x ) ; 
-         b o r d e r :   1 p x   s o l i d   v a r ( - - b o r d e r ) ; 
-         b o r d e r - r a d i u s :   2 0 p x ; 
-         p a d d i n g :   2 4 p x ; 
-         b o x - s h a d o w :   0   1 5 p x   3 0 p x   r g b a ( 0 ,   0 ,   0 ,   0 . 1 ) ; 
-         z - i n d e x :   9 0 0 0 ; 
- } 
- 
- . p r o g r e s s - h e a d e r   { 
-         d i s p l a y :   f l e x ; 
-         j u s t i f y - c o n t e n t :   s p a c e - b e t w e e n ; 
-         f o n t - s i z e :   0 . 8 5 r e m ; 
-         f o n t - w e i g h t :   7 0 0 ; 
-         m a r g i n - b o t t o m :   1 2 p x ; 
-         c o l o r :   v a r ( - - t e x t - m a i n ) ; 
- } 
- 
- . p r o g r e s s - b a r - c o n t a i n e r   { 
-         h e i g h t :   6 p x ; 
-         b a c k g r o u n d :   # e 2 e 8 f 0 ; 
-         b o r d e r - r a d i u s :   1 0 p x ; 
-         o v e r f l o w :   h i d d e n ; 
-         m a r g i n - b o t t o m :   1 6 p x ; 
- } 
- 
- . p r o g r e s s - b a r - f i l l   { 
-         h e i g h t :   1 0 0 % ; 
-         b a c k g r o u n d :   v a r ( - - p r i m a r y ) ; 
-         w i d t h :   0 % ; 
-         t r a n s i t i o n :   w i d t h   0 . 3 s   e a s e ; 
- } 
- 
- . u p l o a d - f i l e - l i s t   { 
-         l i s t - s t y l e :   n o n e ; 
-         m a x - h e i g h t :   1 2 0 p x ; 
-         o v e r f l o w - y :   a u t o ; 
-         f o n t - s i z e :   0 . 8 r e m ; 
-         c o l o r :   v a r ( - - t e x t - s e c o n d a r y ) ; 
- } 
- 
- . u p l o a d - f i l e - l i s t   l i   { 
-         d i s p l a y :   f l e x ; 
-         j u s t i f y - c o n t e n t :   s p a c e - b e t w e e n ; 
-         m a r g i n - b o t t o m :   6 p x ; 
- } 
- 
- . s t a t u s - c h e c k   { 
-         c o l o r :   # 1 0 b 9 8 1 ; 
-         f o n t - w e i g h t :   8 0 0 ; 
- } 
-  
- 
+
+.highlight-match {
+    background-color: #fef08a !important;
+    border-radius: 4px;
+    padding: 2px 4px;
+    font-weight: 700;
+    color: #000;
+    box-shadow: 0 0 12px rgba(254, 240, 138, 1);
+    display: inline;
+    transition: all 0.3s ease;
+}
+
+@keyframes pulse-highlight {
+    0% {
+        background-color: #fef08a;
+        box-shadow: 0 0 12px rgba(254, 240, 138, 1);
+    }
+
+    50% {
+        background-color: #fffbcf;
+        box-shadow: 0 0 20px rgba(254, 240, 138, 0.5);
+    }
+
+    100% {
+        background-color: #fef08a;
+        box-shadow: 0 0 12px rgba(254, 240, 138, 1);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

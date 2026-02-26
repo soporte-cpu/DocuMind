@@ -548,9 +548,14 @@ async function loadChat(sid) {
     } catch (e) { console.error("LoadChat fail:", e); }
 }
 
+let currentSourceMetadata = {};
+let lastUserQuery = '';
+let sourceStore = [];
+
 async function sendMessage() {
     const text = userInput.value.trim();
     if (!text) return;
+    lastUserQuery = text;
     appendMessage('user', text);
     userInput.value = '';
     userInput.style.height = 'auto';
@@ -580,17 +585,16 @@ function appendMessage(role, content, isLoading = false, sources = []) {
     if (sources && sources.length > 0) {
         sourcesHtml = `<div class="source-container" style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">`;
         sources.forEach((s) => {
-            // 's' es ahora un objeto {name: string, content: string}
-            const sName = (typeof s === 'string') ? s : (s.name || "Desconocido");
-            const sContent = (typeof s === 'string') ? "" : (s.content || "");
-
-            // Extraemos solo el nombre del archivo si es una ruta larga
+            const sName = s.name || "Desconocido";
+            const sArea = s.area || "General";
+            const sContent = s.content || "";
             const displayName = sName.split(/[\\/]/).pop();
 
-            // Escapar contenido para el atributo simple
-            const escapedContent = sContent.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+            // Guardar en store para evitar problemas de escape en HTML
+            const storeIdx = sourceStore.length;
+            sourceStore.push({ name: sName, area: sArea, snippet: sContent, query: lastUserQuery });
 
-            sourcesHtml += `<span class="source-tag" onclick="showSourceDetail('${displayName}', \`${escapedContent}\`)" title="Ver cita original">📄 ${displayName}</span>`;
+            sourcesHtml += `<span class="source-tag" onclick="showSourceStoreDetail(${storeIdx})" title="Ver verificación Pro">📄 ${displayName}</span>`;
         });
         sourcesHtml += `</div>`;
     }
@@ -607,11 +611,123 @@ function appendMessage(role, content, isLoading = false, sources = []) {
     return msgDiv;
 }
 
-function showSourceDetail(name, content) {
+function showSourceStoreDetail(idx) {
+    const data = sourceStore[idx];
+    if (data) {
+        showSourceDetail(data.name, data.area, data.snippet, data.query);
+    }
+}
+
+async function showSourceDetail(name, area, snippet, query = '') {
     const modal = document.getElementById('source-modal');
-    document.getElementById('source-modal-title').innerText = `Fuente: ${name}`;
-    document.getElementById('source-modal-content').innerText = content || "No hay fragmento disponible para esta cita.";
+    const displayName = name.split(/[\\/]/).pop();
+
+    currentSourceMetadata = { name, area, snippet, query };
+
+    document.getElementById('source-modal-filename').innerText = `${area} / ${displayName}`;
+    document.getElementById('source-modal-content').innerText = snippet;
+
+    // Reset tabs
+    switchSourceTab('fragment');
+
+    // Configurar descarga
+    const downloadBtn = document.getElementById('download-source-btn');
+    downloadBtn.onclick = () => {
+        const token = localStorage.getItem('documind_token');
+        if (!token) {
+            alert("Su sesión ha expirado o no es válida. Por favor, inicie sesión nuevamente.");
+            return;
+        }
+        const encodedArea = encodeURIComponent(area);
+        const encodedName = encodeURIComponent(name);
+        const url = `${API_BASE}/document/download/${encodedArea}/${encodedName}?token=${token}`;
+        window.open(url, '_blank');
+    };
+
     modal.style.display = 'flex';
+}
+
+async function switchSourceTab(tab) {
+    const fragmentTab = document.getElementById('source-modal-fragment');
+    const fullTab = document.getElementById('source-modal-full');
+    const btns = document.querySelectorAll('.tab-btn');
+
+    btns.forEach(b => b.classList.remove('active'));
+    fragmentTab.classList.remove('active');
+    fullTab.classList.remove('active');
+
+    if (tab === 'fragment') {
+        btns[0].classList.add('active');
+        fragmentTab.classList.add('active');
+    } else {
+        btns[1].classList.add('active');
+        fullTab.classList.add('active');
+
+        const contentDiv = document.getElementById('source-modal-full-content');
+        contentDiv.innerHTML = '<div style="text-align:center; padding:40px;">🔍 Extrayendo texto original y resaltando cita...</div>';
+
+        try {
+            const res = await authFetch(`${API_BASE}/document/text/${currentSourceMetadata.area}/${currentSourceMetadata.name}`);
+            const data = await res.json();
+
+            let fullText = data.text;
+            const snippet = currentSourceMetadata.snippet;
+            const query = currentSourceMetadata.query || '';
+
+            // MOTOR DE RESALTADO V6 (FOCUS TÉCNICO)
+            const words = snippet.split(/\s+/).filter(w => w.length > 2);
+
+            // 1. Filtrar palabras "vacías" de la pregunta y gramática común
+            const questionStops = [
+                'que', 'qué', 'como', 'cómo', 'donde', 'dónde', 'cual', 'cuál',
+                'quien', 'quién', 'cuando', 'cuándo', 'esta', 'estos', 'este',
+                'puedes', 'podrías', 'sobre', 'decirme', 'existe'
+            ];
+            const queryTerms = query.toLowerCase().replace(/[?¿!¡]/g, '').split(/\s+/).filter(w =>
+                w.length >= 3 && !questionStops.includes(w)
+            );
+
+            // 2. Intentar bloque exacto primero (Máxima fidelidad)
+            const searchBlock = words.slice(0, 10).join(' ');
+            const blockPattern = searchBlock.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+');
+            const blockRegex = new RegExp(blockPattern, 'i');
+
+            if (blockRegex.test(fullText)) {
+                fullText = fullText.replace(blockRegex, (match) => `<span class="highlight-match">${match}</span>`);
+            } else {
+                // 3. Fallback inteligente: Prioridad a PALABRAS CLAVE
+                const highlightGroup = words.filter(w => {
+                    const lowW = w.toLowerCase().replace(/[.,()]/g, '');
+                    const isTechnical = /([A-Z]{2,}|[a-z]+[A-Z][a-z]+|[A-Z][a-z]+[A-Z])/.test(w);
+                    const isInQuery = queryTerms.some(qt => lowW === qt || lowW.includes(qt));
+                    return isInQuery || isTechnical;
+                });
+
+                [...new Set(highlightGroup)].sort((a, b) => {
+                    const aInQ = queryTerms.includes(a.toLowerCase());
+                    const bInQ = queryTerms.includes(b.toLowerCase());
+                    return bInQ - aInQ;
+                }).slice(0, 12).forEach(word => {
+                    const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    const wordRegex = new RegExp(`\\b(${escaped})\\b`, 'gi');
+                    fullText = fullText.replace(wordRegex, `<span class="highlight-match">$1</span>`);
+                });
+            }
+
+            contentDiv.innerHTML = fullText;
+
+            setTimeout(() => {
+                const hl = contentDiv.querySelector('.highlight-match');
+                if (hl) {
+                    hl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    hl.style.animation = 'pulse-highlight 2s infinite';
+                }
+            }, 300);
+
+        } catch (e) {
+            contentDiv.innerText = "Error al cargar el documento completo.";
+        }
+    }
 }
 
 function setupAutoResize() {
@@ -634,7 +750,6 @@ userInput.onkeydown = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.prevent
 window.onclick = (e) => {
     if (e.target.classList.contains('modal-bg')) {
         e.target.style.display = 'none';
-        // También cerramos modales específicos si tienen funciones dedicadas
         if (e.target.id === 'area-modal') closeAreaModal();
         if (e.target.id === 'user-modal') closeUserModal();
     }

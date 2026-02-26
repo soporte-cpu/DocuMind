@@ -2,6 +2,26 @@
 
 Todas las modificaciones notables de este proyecto se documentarán en este archivo.
 
+## [1.3.0] - 2026-02-26
+### v1.3.0 Audit & UX Elite
+Cuarta gran actualización enfocada en la experiencia de auditoría profesional y la diferenciación visual del flujo de trabajo.
+
+### Añadido
+- **Descargas Seguras Universales**: Implementación de un extractor de tokens de doble vía (URL + Headers) que garantiza la descarga de documentos originales sin fallos de seguridad.
+- **Motor de Resaltado V7 (Smart-Focus)**: Nueva lógica que ignora automáticamente palabras de pregunta (Qué, Cómo, Cuál) y prioriza términos técnicos y siglas en la auditoría visual.
+- **Estructura Modal "Sticky Controls"**: Rediseño del visor de documentos con encabezado y botones de acción fijos, permitiendo scroll infinito sin perder el botón de descarga o cierre.
+- **Ruta Técnica de Favicon**: Implementación de endpoint dedicado para el icono de la web, eliminando errores 404 en la depuración.
+
+### Cambios (UI/UX)
+- **Rediseño Asimétrico del Chat**: Interfaz estilo mensajería moderna con mensajes de usuario a la derecha (azul vibrante) y respuestas de la IA a la izquierda (blanco elegante).
+- **Restauración de Login Premium**: Corrección de proporciones y etiquetas en la pantalla de acceso para mantener la estética Enterprise solicitada.
+- **URL Encoding de Documentos**: Los archivos con nombres complejos (espacios, tildes) ahora se descargan con total fiabilidad técnica.
+
+### Corregido (Auditoría)
+- **Filtro de Relevancia Quirúrgico**: Eliminación total de documentos "ruido". El sistema ahora exige validación cruzada entre la pregunta original y el contenido técnico para mostrar una fuente.
+- **Error 500 en Consultas**: Solucionado fallo de servidor durante el procesamiento de filtros de relevancia avanzados.
+- **Sincronización de Identidad**: Corregido bug que impedía la descarga por discrepancia en el nombre de la llave de sesión (`documind_token`).
+
 ## [1.2.1] - 2026-02-26
 ### v1.2.1 Consistency Patch
 Mejoras de estabilidad en la recuperación para evitar inconsistencias en preguntas repetidas.

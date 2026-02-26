@@ -3,7 +3,7 @@ import bcrypt
 from datetime import datetime, timedelta
 from typing import Optional, List
 from jose import JWTError, jwt
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Query, Request
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from . import models, database
@@ -16,7 +16,7 @@ SECRET_KEY = os.getenv("SECRET_KEY", "documind_enterprise_super_secret_key_2026"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 # 24 horas
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login", auto_error=False)
 
 def verify_password(plain_password: str, hashed_password: str):
     try:
@@ -43,12 +43,36 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(database.get_db)):
+async def get_current_user(
+    request: Request,
+    db: Session = Depends(database.get_db)
+):
+    """
+    Sistema de Autenticación Universal PRO
+    Detecta el token en:
+    1. Query Parameter 'token' (Para descargas directas)
+    2. Header 'Authorization' (Para peticiones AJAX/Chat)
+    """
+    
+    # 1. Buscar en Query Params (Prioridad para descargas)
+    token = request.query_params.get("token")
+    
+    # 2. Buscar en Headers si no está en Query
+    if not token:
+        auth_header = request.headers.get("Authorization")
+        if auth_header and auth_header.lower().startswith("bearer "):
+            token = auth_header.split(" ")[1]
+    
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="No se pudo validar las credenciales",
         headers={"WWW-Authenticate": "Bearer"},
     )
+
+    if not token or str(token).lower() in ["null", "undefined", "none", ""]:
+        # print("[AUTH] Error: Token no encontrado en URL ni en cabecera")
+        raise credentials_exception
+
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")

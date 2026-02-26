@@ -63,6 +63,7 @@ class QueryRequest(BaseModel):
 class SourceDetail(BaseModel):
     name: str
     content: str
+    area: str
 
 class QueryResponse(BaseModel):
     answer: str
@@ -300,35 +301,59 @@ async def chat(request: QueryRequest, db: Session = Depends(get_db), current_use
         db.add(assistant_msg)
         db.commit()
         
-        # 6. Recolectar fuentes con contenido para Citas Verificables (Filtradas por Relevancia)
+        # 6. Recolectar fuentes con contenido para Citas Verificables (Filtrado Quirúrgico)
         source_details = []
-        unique_sources = {} # {filename: content_summary}
-        
-        # Palabras clave de la respuesta para un filtro rápido
+        unique_sources = {} 
         answer_lower = answer.lower()
+        
+        # Términos de la pregunta original para priorizar relevancia directa
+        query_words = set(w.strip(".,()\"").lower() for w in request.prompt.split() if len(w) > 3)
+        
+        # Palabras "ruido" que NO cuentan para la relevancia técnica
+        noise_words = {
+            "empresa", "procedimiento", "sistema", "documento", "archivo", "operación", 
+            "proceso", "instrucción", "área", "pasos", "acuerdo", "según", "través", 
+            "podrá", "deberá", "mismo", "esta", "estos", "tienen", "será", "incluye",
+            "realizar", "dentro", "fuera", "forma", "parte", "mediante", "trabajador", 
+            "personal", "general", "específicamente", "considera", "relación", "cuenta"
+        }
         
         for doc in docs:
             snippet = doc.page_content.strip()
             filename = doc.metadata.get("source", "Desconocido")
+            filearea = doc.metadata.get("area", "General")
             
-            # Filtro de Relevancia: ¿El snippet aporta algo a la respuesta?
-            # Comprobamos si palabras importantes del snippet están en la respuesta
-            snippet_words = set(snippet.lower().split())
-            query_words = set(standalone_question.lower().split())
+            # Extraer términos de calidad del snippet
+            snippet_words = set(w.strip(".,()\"").lower() for w in snippet.split() if len(w) > 4)
+            quality_terms = snippet_words - noise_words
             
-            # Si el snippet contiene términos clave de la pregunta Y algo de su texto está en la respuesta, es relevante
-            is_relevant = any(word in answer_lower for word in snippet_words if len(word) > 4)
+            # Cálculo de COINCIDENCIAS REALES
+            # 1. Coincidencias con la respuesta generada
+            answer_matches = [t for t in quality_terms if t in answer_lower]
+            
+            # 2. Coincidencia con la pregunta original (SÚPER IMPORTANTE)
+            query_matches = [t for t in quality_terms if t in query_words]
+            
+            # REGLA DE ADMISIÓN ESTRICTA:
+            # - Debe coincidir con al menos una palabra de la PREGUNTA (relevancia directa)
+            # - Y tener al menos 2 términos de calidad que aparezcan en la RESPUESTA
+            # - O si no tiene palabras de la pregunta, debe tener al menos 4 técnicos de la respuesta (relevancia indirecta)
+            
+            is_relevant = False
+            if len(query_matches) >= 1 and len(answer_matches) >= 2:
+                is_relevant = True
+            elif len(answer_matches) >= 4:
+                is_relevant = True
             
             if is_relevant:
                 if filename not in unique_sources:
-                    unique_sources[filename] = snippet
+                    unique_sources[filename] = {"content": snippet, "area": filearea}
                 else:
-                    # Si ya existe, acumulamos un poco más de contexto si no es repetido
-                    if snippet[:50] not in unique_sources[filename]:
-                        unique_sources[filename] += "\n\n[...]\n\n" + snippet
+                    if snippet[:50] not in unique_sources[filename]["content"]:
+                        unique_sources[filename]["content"] += "\n\n[...]\n\n" + snippet
         
-        for name, content in unique_sources.items():
-            source_details.append(SourceDetail(name=name, content=content))
+        for name, data in unique_sources.items():
+            source_details.append(SourceDetail(name=name, content=data["content"], area=data["area"]))
                 
         return QueryResponse(answer=answer, sources=source_details)
     except Exception as e:
@@ -446,6 +471,38 @@ async def delete_chat_session(session_id: str, db: Session = Depends(get_db)):
     db.commit()
     return {"status": "deleted"}
 
+@app.get("/document/text/{area}/{filename:path}")
+async def get_document_text(area: str, filename: str, current_user: models.User = Depends(auth.get_current_user)):
+    """Extrae y devuelve el texto completo de un documento para previsualización."""
+    from .ingest_utils import load_document
+    
+    if area == "General":
+        file_path = DOCS_DIR / filename
+    else:
+        file_path = DOCS_DIR / area / filename
+        
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="Archivo no encontrado")
+    
+    try:
+        text = load_document(file_path)
+        return {"text": text}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al leer el documento: {str(e)}")
+
+@app.get("/document/download/{area}/{filename:path}")
+async def download_document(area: str, filename: str, current_user: models.User = Depends(auth.get_current_user)):
+    """Permite descargar el archivo original."""
+    if area == "General":
+        file_path = DOCS_DIR / filename
+    else:
+        file_path = DOCS_DIR / area / filename
+        
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="Archivo no encontrado")
+        
+    return FileResponse(path=file_path, filename=file_path.name)
+
 @app.get("/files")
 async def list_files():
     files = []
@@ -545,6 +602,10 @@ FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
 @app.get("/")
 async def read_index():
     return FileResponse(FRONTEND_DIR / "index.html")
+
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    return FileResponse(FRONTEND_DIR / "favicon.ico") if (FRONTEND_DIR / "favicon.ico").exists() else None
 
 # Servir archivos estáticos (CSS, JS, Imágenes)
 app.mount("/", StaticFiles(directory=FRONTEND_DIR), name="frontend")

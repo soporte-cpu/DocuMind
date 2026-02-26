@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -233,24 +233,56 @@
         </div>
     </div>
 
-    <!-- Modal Citas Verificables -->
+    <!-- Modal Citas Verificables PRO -->
     <div class="modal-bg" id="source-modal">
-        <div class="modal-card" style="max-width: 700px;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px;">
-                <div>
-                    <h3 id="source-modal-title" style="margin-bottom: 4px;">Detalles de la Cita</h3>
-                    <p class="text-muted" style="font-size: 0.85rem;">Fragmento original extraído del documento</p>
+        <div class="modal-card">
+            <div class="modal-header-pro">
+                <div style="display: flex; align-items: center; gap: 20px;">
+                    <div class="logo-box" style="width: 48px; height: 48px; border-radius: 12px; font-size: 1.2rem;">D
+                    </div>
+                    <div>
+                        <h3 id="source-modal-title"
+                            style="margin-bottom: 4px; font-size: 1.4rem; font-weight: 800; letter-spacing: -0.02em;">
+                            Auditoría de Fuente</h3>
+                        <p id="source-modal-filename" class="text-muted"
+                            style="font-size: 0.9rem; font-family: 'Courier New', monospace; background: #f1f5f9; padding: 4px 10px; border-radius: 6px; display: inline-block;">
+                        </p>
+                    </div>
                 </div>
-                <button class="btn-icon"
-                    onclick="document.getElementById('source-modal').style.display='none'">✕</button>
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    <button class="btn-ghost" id="download-source-btn"
+                        style="padding: 12px 20px; font-size: 0.9rem; font-weight: 700; border: 1.5px solid var(--border); border-radius: 12px; color: var(--text-secondary);">
+                        ⬇️ Descargar Documento
+                    </button>
+                    <button class="btn-icon"
+                        style="font-size: 1.5rem; width: 44px; height: 44px; background: #f1f5f9; border-radius: 50%;"
+                        onclick="document.getElementById('source-modal').style.display='none'">✕</button>
+                </div>
             </div>
-            <div id="source-modal-content"
-                style="background: #f8fafc; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0; line-height: 1.7; font-size: 0.95rem; color: #1e293b; max-height: 400px; overflow-y: auto; white-space: pre-wrap;">
-                Cargando contenido...
+
+            <div class="modal-tabs source-modal-tabs">
+                <button class="tab-btn active source-tab-btn" onclick="switchSourceTab('fragment')">Fragmento
+                    Citado</button>
+                <button class="tab-btn source-tab-btn" onclick="switchSourceTab('full')">Documento Completo
+                    (Contexto)</button>
             </div>
-            <div class="modal-footer">
-                <button class="btn-primary"
-                    onclick="document.getElementById('source-modal').style.display='none'">Entendido</button>
+
+            <div id="source-modal-content-wrapper" class="source-viewer active">
+                <div id="source-modal-fragment" class="source-viewer active">
+                    <div id="source-modal-content" class="document-page source-document-page-fragment">
+                        Cargando fragmento...
+                    </div>
+                </div>
+                <div id="source-modal-full" class="source-viewer">
+                    <div id="source-modal-full-content" class="document-page">
+                        Cargando documento completo...
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer source-modal-footer">
+                <button class="btn-primary source-close-audit-btn"
+                    onclick="document.getElementById('source-modal').style.display='none'">Finalizar Revisión</button>
             </div>
         </div>
     </div>
