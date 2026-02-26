@@ -1347,3 +1347,14 @@ textarea#user-input {
         border-radius: 0;
     }
 }
+/* FIX: mobile toggle button override - dark icon on white header */
+.mobile-menu-toggle {
+    color: #0f172a !important;
+    font-size: 1.5rem !important;
+    display: none !important;
+}
+@media (max-width: 768px) {
+    .mobile-menu-toggle {
+        display: block !important;
+    }
+}
