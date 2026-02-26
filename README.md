@@ -1,4 +1,4 @@
-# DocuMind Enterprise v1.3.0 🚀
+# DocuMind Enterprise v1.4.0 🚀
 
 DocuMind Enterprise es una plataforma de gestión documental inteligente potenciada por Inteligencia Artificial y arquitectura RAG (Retrieval-Augmented Generation). Permite organizar documentos por áreas, realizar búsquedas híbridas (semántica + técnica) y chatear con los documentos para obtener respuestas precisas y profesionales con citación verificable.
 
@@ -6,11 +6,16 @@ DocuMind Enterprise es una plataforma de gestión documental inteligente potenci
 
 ### 🗺️ Visión Estratégica y Progreso
 *   **[Ver Hoja de Ruta (ROADMAP.md)](./ROADMAP.md)** - Explora los planes para la v2.0 "Compliance Engine".
-*   **[Historial de Cambios (CHANGELOG.md)](./CHANGELOG.md)** - Revisa las últimas mejoras de la v1.3.0.
+*   **[Historial de Cambios (CHANGELOG.md)](./CHANGELOG.md)** - Revisa las últimas mejoras de la v1.4.0.
 
 ---
 
-## 🌟 Características Destacadas (v1.3.0)
+## 🌟 Características Destacadas (v1.4.0)
+
+### ✨ Inteligencia de Área Proactiva (Nuevo)
+- **Area Intelligence Dash**: Generación automática de resúmenes ejecutivos al entrar en cualquier carpeta.
+- **Top Temas Clave**: Identificación rápida de conceptos técnicos y hashtags temáticos por área.
+- **Preguntas Sugeridas**: La IA propone consultas inteligentes basadas en el contenido real de tus archivos.
 
 ### 🧐 Motor de Auditoría Inteligente (Smart-Focus V7)
 - **Resaltado Selectivo**: La IA ignora la gramática común y se enfoca en términos técnicos y siglas críticas.
@@ -67,4 +72,4 @@ documind-enterprise/
 ```
 
 ---
-*Hecho con Antigravity AI - v1.3.0 Audit & UX Elite Edition*
+*Hecho con Antigravity AI - v1.4.0 Area Intelligence Edition*

@@ -33,8 +33,9 @@ Transformar DocuMind en una herramienta que permita a las empresas subir estánd
 
 | Tarea | Detalle | Estado |
 | :--- | :--- | :--- |
+| **Area Intelligence Dash** | Resúmenes automáticos y temas clave por carpeta. | ✅ Completado |
+| **Responsive Mobile v2** | Menús colapsables y diseño táctil optimizado. | ✅ Completado |
 | **Pestaña "Normativa"** | Interfaz inicial para gestionar estándares. | 🗓️ Pendiente |
-| **Motor de Metadatos** | Extracción de Fechas, Empresas y Tipos de Doc. | 🗓️ Pendiente |
 | **Filtros Avanzados** | Búsqueda RAG filtrada por año o estado del documento. | 🗓️ Pendiente |
 | **Prompt de Análisis de Brecha** | Lógica RAG especializada en comparación de normas. | 🗓️ Pendiente |
 
