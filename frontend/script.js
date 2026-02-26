@@ -496,6 +496,14 @@ async function uploadToCurrentArea(files) {
 
     await Promise.all(workers);
 
+    // Iniciar indexación una sola vez al terminar todo el lote
+    statusText.innerText = "Registrando cambios...";
+    try {
+        await authFetch(`${API_BASE}/index`, { method: 'POST' });
+    } catch (e) {
+        console.error("Fallo al pedir indexación:", e);
+    }
+
     // Iniciar polling de indexación
     statusText.innerText = "Indexando documentos (RAG)...";
     checkIndexingStatus();

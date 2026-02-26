@@ -2,6 +2,21 @@
 
 Todas las modificaciones notables de este proyecto se documentarán en este archivo.
 
+## [1.4.1] - 2026-02-26
+### v1.4.1 Bulk Stability & Elite UI
+Sexta actualización enfocada en la robustez operativa para cargas masivas de datos y el refinamiento de la interfaz de usuario.
+
+### Añadido
+- **Nueva Cola de Subida Paralela**: Procesamiento de hasta 3 archivos simultáneos para optimizar tiempos de transferencia.
+- **Panel de Progreso Flotante**: Rediseño visual completo con degradados, sombras modernas y botón de cierre manual (X).
+- **Control de Indexación (Locking)**: Mecanismo de seguridad en el backend que evita el colapso del CPU al procesar múltiples archivos.
+- **Sanitización de Nombres**: Limpieza automática de caracteres especiales en archivos para garantizar compatibilidad total con servidores Windows.
+
+### Corregido
+- **Error 500 en XLSX**: Estabilización del lector de hojas de cálculo para evitar fallos por archivos corruptos o bloqueados.
+- **Manejo de Lotes**: El sistema ahora indexa una sola vez al terminar todo el grupo de archivos, ahorrando memoria y CPU.
+- **Pérdida de Contexto en Subida**: Corregido el bug de IDs que ocultaba la lista de archivos cargando.
+
 ## [1.4.0] - 2026-02-26
 ### v1.4.0 Area Intelligence & Precision
 Quinta actualización enfocada en convertir la gestión documental en inteligencia accionable proactiva.

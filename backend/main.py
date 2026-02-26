@@ -56,6 +56,9 @@ app.add_middleware(
 # Almacenamiento simple de sesiones en memoria
 sessions_history: Dict[str, List] = {}
 
+# Bloqueo para evitar indexaciones simultáneas
+indexing_lock = False
+
 class QueryRequest(BaseModel):
     prompt: str
     session_id: Optional[str] = "default"
@@ -599,12 +602,27 @@ async def get_indexing_status():
     return {"is_indexing": is_indexing}
 
 def wrap_update_vector_store():
-    global is_indexing
+    global is_indexing, indexing_lock
+    if indexing_lock:
+        print("[SKIP] Indexación ya en curso, tarea omitida.")
+        return
+    
+    indexing_lock = True
     is_indexing = True
     try:
         update_vector_store()
     finally:
         is_indexing = False
+        indexing_lock = False
+
+@app.post("/index")
+async def trigger_indexing(background_tasks: BackgroundTasks, admin_user: models.User = Depends(auth.check_admin_role)):
+    """Inicia manualmente el proceso de indexación."""
+    global is_indexing
+    if is_indexing:
+        return {"status": "already_indexing"}
+    background_tasks.add_task(wrap_update_vector_store)
+    return {"status": "indexing_started"}
 
 @app.post("/upload")
 async def upload_file(background_tasks: BackgroundTasks, file: UploadFile = File(...), area: Optional[str] = None, subfolder: Optional[str] = None, admin_user: models.User = Depends(auth.check_admin_role)):
@@ -628,10 +646,10 @@ async def upload_file(background_tasks: BackgroundTasks, file: UploadFile = File
         shutil.copyfileobj(file.file, buffer)
     
     print(f"   [OK] Guardado: {file.filename}")
-    # Ejecutar indexación en segundo plano
-    background_tasks.add_task(wrap_update_vector_store)
+    # No disparamos indexación automática aquí para evitar spam en subidas masivas
+    # El frontend llamará a /index al terminar el lote
     
-    return {"filename": file.filename, "status": "uploaded", "index_status": "queued"}
+    return {"filename": file.filename, "status": "uploaded"}
 
 @app.post("/reprocess")
 async def reprocess_docs(background_tasks: BackgroundTasks, current_user: models.User = Depends(auth.check_admin_role)):
