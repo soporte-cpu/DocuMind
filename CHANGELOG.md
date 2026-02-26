@@ -2,6 +2,20 @@
 
 Todas las modificaciones notables de este proyecto se documentarán en este archivo.
 
+## [1.4.0] - 2026-02-26
+### v1.4.0 Area Intelligence & Precision
+Quinta actualización enfocada en convertir la gestión documental en inteligencia accionable proactiva.
+
+### Añadido
+- **Area Intelligence Dash**: Panel dinámico que genera un resumen ejecutivo automático de cada carpeta usando GPT-4o.
+- **Auto-Discovery de Temas**: Extracción inteligente de hashtags técnicos y conceptos clave propios de cada área.
+- **Preguntas Sugeridas Inteligentes**: Botones interactivos que proponen consultas relevantes basadas en el contenido real de los documentos de la carpeta.
+
+### Mejoras (UI/UX)
+- **Responsive Mobile Elite v2**: Sistema de menús laterales ocultos con botón toggle (☰) optimizado para controles táctiles y pantallas pequeñas.
+- **Viewport Lock**: Configuración de escalado fijo para evitar deformaciones visuales en navegadores móviles.
+- **Animaciones de Carga Flint**: Micro-animaciones para el estado de generación de resúmenes inteligentes.
+
 ## [1.3.0] - 2026-02-26
 ### v1.3.0 Audit & UX Elite
 Cuarta gran actualización enfocada en la experiencia de auditoría profesional y la diferenciación visual del flujo de trabajo.

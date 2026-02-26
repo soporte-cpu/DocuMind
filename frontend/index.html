@@ -118,6 +118,31 @@
                     <input type="file" id="folder-upload" webkitdirectory directory multiple hidden
                         onchange="uploadToCurrentArea(this.files)">
                 </header>
+
+                <!-- Panel de Inteligencia de Área (Nuevo) -->
+                <div id="area-intelligence-container"
+                    style="display:none; padding: 20px 40px 0 40px; animation: fadeIn 0.5s ease;">
+                    <div class="intel-card">
+                        <div class="intel-header">
+                            <span class="intel-badge">✨ INTELIGENCIA DE ÁREA</span>
+                            <div class="intel-controls">
+                                <button class="btn-icon-sm"
+                                    onclick="this.closest('#area-intelligence-container').style.display='none'">×</button>
+                            </div>
+                        </div>
+                        <div class="intel-body">
+                            <div class="intel-summary">
+                                <p id="area-summary-text">Generando resumen estratégico...</p>
+                            </div>
+                            <div class="intel-tags" id="area-topics-list"></div>
+                        </div>
+                        <div class="intel-footer">
+                            <span class="label-tiny">PREGUNTAS SUGERIDAS:</span>
+                            <div class="intel-questions" id="area-questions-list"></div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="k-grid" id="k-file-grid"></div>
             </main>
         </div>

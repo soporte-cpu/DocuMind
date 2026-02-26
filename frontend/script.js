@@ -335,6 +335,56 @@ function selectArea(area) {
     document.getElementById('current-area-icon').textContent = area.icon;
     document.getElementById('current-area-name').textContent = area.name;
     loadFilesForArea(area.name);
+    loadAreaIntelligence(area.name);
+}
+
+async function loadAreaIntelligence(areaName) {
+    const container = document.getElementById('area-intelligence-container');
+    const summaryText = document.getElementById('area-summary-text');
+    const topicsList = document.getElementById('area-topics-list');
+    const questionsList = document.getElementById('area-questions-list');
+
+    // Reset UI
+    container.style.display = 'block';
+    summaryText.innerHTML = '<span class="loading-dots">Generando resumen estratégico...</span>';
+    topicsList.innerHTML = '';
+    questionsList.innerHTML = '';
+
+    try {
+        const res = await authFetch(`${API_BASE}/areas/${encodeURIComponent(areaName)}/summary`);
+        const data = await res.json();
+
+        summaryText.innerText = data.summary || "No se pudo generar el resumen.";
+
+        if (data.topics) {
+            data.topics.forEach(t => {
+                const badge = document.createElement('span');
+                badge.className = 'intel-tag';
+                badge.innerText = `# ${t}`;
+                topicsList.appendChild(badge);
+            });
+        }
+
+        if (data.questions) {
+            data.questions.forEach(q => {
+                const btn = document.createElement('button');
+                btn.className = 'intel-question-btn';
+                btn.innerText = q;
+                btn.onclick = () => {
+                    switchView('chat');
+                    chatAreaSelector.value = areaName;
+                    userInput.value = q;
+                    userInput.focus();
+                    // Opcional: auto-enviar
+                    // sendMessage();
+                };
+                questionsList.appendChild(btn);
+            });
+        }
+    } catch (e) {
+        console.error("Intel fail:", e);
+        summaryText.innerText = "Panel de inteligencia no disponible en este momento.";
+    }
 }
 
 async function loadFilesForArea(areaName) {

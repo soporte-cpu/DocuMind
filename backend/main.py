@@ -438,6 +438,54 @@ async def delete_area(area_id: int, db: Session = Depends(get_db), admin_user: m
     update_vector_store()
     return {"status": "deleted"}
 
+@app.get("/areas/{area_name}/summary")
+async def get_area_summary(area_name: str, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    """Genera un resumen ejecutivo de la carpeta usando IA."""
+    area_path = DOCS_DIR / area_name
+    if not area_path.exists():
+        return {"summary": "Área vacía o no encontrada.", "topics": [], "questions": []}
+    
+    # Recolectar fragmentos de los primeros archivos
+    corpus = []
+    files = list(area_path.glob("*"))[:5] # Máximo 5 archivos para el resumen rápido
+    
+    from .ingest_utils import load_document
+    for f in files:
+        if f.is_file():
+            try:
+                text = load_document(f)
+                corpus.append(f"{f.name}: {text[:1500]}") # Primeros 1500 caracteres por archivo
+            except: continue
+            
+    if not corpus:
+        return {"summary": "No hay texto legible en esta área.", "topics": [], "questions": []}
+        
+    all_text = "\n---\n".join(corpus)[:8000] # Limitar a 8k caracteres para el prompt
+    
+    llm = ChatOpenAI(model_name="gpt-4o", temperature=0)
+    prompt = f"""Eres un Auditor Experto de DocuMind. 
+    Analiza estos fragmentos de documentos de la carpeta '{area_name}' y genera un objeto JSON con:
+    1. "summary": Un resumen ejecutivo profesional de máximo 2 líneas.
+    2. "topics": Una lista (máximo 5) de temas técnicos o conceptos clave encontrados.
+    3. "questions": Una lista de 2 preguntas inteligentes que un usuario podría hacerle a estos documentos.
+    
+    Responde ÚNICAMENTE el JSON.
+    Documentos:
+    {all_text}
+    """
+    
+    try:
+        from langchain_core.output_parsers import JsonOutputParser
+        res = llm.invoke([HumanMessage(content=prompt)])
+        import json
+        # Limpiar posible formato markdown del LLM
+        clean_res = res.content.replace("```json", "").replace("```", "").strip()
+        data = json.loads(clean_res)
+        return data
+    except Exception as e:
+        print(f"[ERROR SUMMARY] {e}")
+        return {"summary": "Error generando resumen inteligente.", "topics": [], "questions": []}
+
 @app.get("/history")
 async def get_all_history(db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
     """Obtiene la lista de conversaciones guardadas filtradas por el usuario actual."""
