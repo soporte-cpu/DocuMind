@@ -40,10 +40,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Mobile Menu Toggle Logic
     const menuBtn = document.getElementById('mobile-menu-btn');
     const sidebar = document.querySelector('.sidebar');
-    if (menuBtn) {
+    if (menuBtn && sidebar) {
         menuBtn.onclick = () => {
-            sidebar.classList.toggle('mobile-active');
+            sidebar.classList.toggle('open');
         };
+        // Cerrar sidebar al tocar fuera de el
+        document.addEventListener('click', (e) => {
+            if (sidebar.classList.contains('open') &&
+                !sidebar.contains(e.target) &&
+                e.target !== menuBtn) {
+                sidebar.classList.remove('open');
+            }
+        });
     }
 
     if (!localStorage.getItem('documind_token')) {
