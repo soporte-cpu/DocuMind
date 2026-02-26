@@ -164,7 +164,17 @@ def update_vector_store():
 
 def get_hybrid_retriever(area: Optional[str] = None):
     """Carga los índices y devuelve un EnsembleRetriever (FAISS + BM25) con filtro opcional por área."""
-    from langchain.retrievers.ensemble import EnsembleRetriever
+    try:
+        from langchain.retrievers import EnsembleRetriever
+    except ImportError:
+        from langchain_core.retrievers import BaseRetriever
+        # Fallback a un retriever simple si Ensemble falla por instalación incompleta
+        vs = get_vector_store()
+        if not vs: return None
+        search_kwargs = {"k": 8}
+        if area: search_kwargs["filter"] = {"area": area}
+        return vs.as_retriever(search_kwargs=search_kwargs)
+
     from langchain_community.retrievers import BM25Retriever
     from langchain_core.documents import Document
     import pickle
