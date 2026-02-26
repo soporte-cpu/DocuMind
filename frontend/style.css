@@ -1461,3 +1461,107 @@ textarea#user-input {
   60% { content: '...'; }
   80%, 100% { content: ''; }
 }
+/* =========================================
+   NEW UPLOAD PROGRESS PANEL (ELITE)
+   ========================================= */
+.upload-progress-panel {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 380px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    box-shadow: 0 20px 40px -10px rgba(0,0,0,0.15);
+    z-index: 5000;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUp {
+    from { transform: translateY(100px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#progress-status-text {
+    font-weight: 800;
+    font-size: 0.95rem;
+    color: #0f172a;
+    font-family: 'Outfit';
+}
+
+.progress-percentage {
+    font-weight: 900;
+    color: var(--primary);
+    font-size: 1.1rem;
+}
+
+.progress-bar-container {
+    height: 8px;
+    background: #f1f5f9;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), #6366f1);
+    transition: width 0.4s ease;
+}
+
+.upload-file-list-container {
+    max-height: 200px;
+    overflow-y: auto;
+    border-top: 1px solid #f1f5f9;
+    margin-top: 4px;
+}
+
+.upload-file-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.progress-file-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 4px;
+    border-bottom: 1px solid #f8fafc;
+}
+
+.progress-file-item span:first-child {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #475569;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 250px;
+}
+
+.file-status {
+    font-size: 1rem;
+}
+
+.loading-spinner-sm {
+    width: 18px;
+    height: 18px;
+    border: 2.5px solid #e2e8f0;
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}

@@ -1,5 +1,6 @@
 import os
 import shutil
+import time
 from pathlib import Path
 from fastapi import FastAPI, UploadFile, File, HTTPException, BackgroundTasks
 from fastapi.responses import FileResponse
@@ -614,12 +615,19 @@ async def upload_file(background_tasks: BackgroundTasks, file: UploadFile = File
     if subfolder:
         target_dir = target_dir / subfolder
         
+    print(f"[UPLOAD] Iniciando subida: {file.filename} -> Área: {area or 'General'} | Subfolder: {subfolder or 'None'}")
     target_dir.mkdir(parents=True, exist_ok=True)
     
-    file_path = target_dir / file.filename
+    # Sanitizar nombre de archivo (remover caracteres prohibidos en Windows/Linux)
+    safe_filename = "".join([c for c in file.filename if c.isalnum() or c in ".-_ "]).strip()
+    if not safe_filename: safe_filename = f"upload_{int(time.time())}"
+    
+    file_path = target_dir / safe_filename
+    print(f"   [+] Escribiendo a: {file_path}")
     with file_path.open("wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
     
+    print(f"   [OK] Guardado: {file.filename}")
     # Ejecutar indexación en segundo plano
     background_tasks.add_task(wrap_update_vector_store)
     

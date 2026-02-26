@@ -448,22 +448,19 @@ async function uploadToCurrentArea(files) {
     panel.style.display = 'flex';
     fileList.innerHTML = '';
     barFill.style.width = '0%';
+    document.getElementById('progress-percentage').innerText = '0%';
     statusText.innerText = `Subiendo ${files.length} archivo(s)...`;
 
     let uploadedCount = 0;
-
-    for (let file of files) {
-        // Crear elemento en la lista
-        const item = document.createElement('div');
+    const uploadFile = async (file) => {
+        const item = document.createElement('li');
         item.className = 'progress-file-item';
         item.innerHTML = `<span>${file.name}</span><span class="file-status">⏳</span>`;
         fileList.appendChild(item);
 
         const formData = new FormData();
         formData.append('file', file);
-
         let url = `${API_BASE}/upload?area=${encodeURIComponent(currentArea.name)}`;
-
         if (file.webkitRelativePath) {
             const relPath = file.webkitRelativePath;
             const subfolder = relPath.substring(0, relPath.lastIndexOf('/'));
@@ -473,16 +470,31 @@ async function uploadToCurrentArea(files) {
         try {
             const res = await authFetch(url, { method: 'POST', body: formData });
             if (res.ok) {
-                item.querySelector('.file-status').innerHTML = '<span class="status-check">✓</span>';
+                item.querySelector('.file-status').innerHTML = '✅';
                 uploadedCount++;
-                barFill.style.width = `${(uploadedCount / files.length) * 100}%`;
+                const pct = Math.round((uploadedCount / files.length) * 100);
+                barFill.style.width = `${pct}%`;
+                document.getElementById('progress-percentage').innerText = `${pct}%`;
             } else {
-                item.querySelector('.file-status').innerText = '❌';
+                const data = await res.json();
+                item.querySelector('.file-status').innerHTML = '❌';
+                item.title = data.detail || "Error de servidor";
             }
         } catch (e) {
-            item.querySelector('.file-status').innerText = '❌';
+            item.querySelector('.file-status').innerHTML = '⚠️';
+            item.title = e.message || "Error de red";
         }
-    }
+    };
+
+    // Subida paralela controlada (máximo 3 al mismo tiempo para no saturar)
+    const queue = Array.from(files);
+    const workers = Array.from({ length: Math.min(3, queue.length) }, async () => {
+        while (queue.length > 0) {
+            await uploadFile(queue.shift());
+        }
+    });
+
+    await Promise.all(workers);
 
     // Iniciar polling de indexación
     statusText.innerText = "Indexando documentos (RAG)...";

@@ -313,16 +313,21 @@
         </div>
     </div>
 
-    <!-- Panel de Progreso de Subida -->
+    <!-- Panel de Progreso de Subida (Rediseñado) -->
     <div id="upload-progress-panel" class="upload-progress-panel" style="display: none;">
         <div class="progress-header">
-            <span id="progress-status-text">Subiendo archivos...</span>
-            <span id="progress-percentage">0%</span>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div class="loading-spinner-sm"></div>
+                <span id="progress-status-text">Subiendo archivos...</span>
+            </div>
+            <span id="progress-percentage" class="progress-percentage">0%</span>
         </div>
         <div class="progress-bar-container">
             <div id="progress-bar-fill" class="progress-bar-fill" style="width: 0%;"></div>
         </div>
-        <ul id="upload-file-list" class="upload-file-list"></ul>
+        <div class="upload-file-list-container">
+            <ul id="progress-file-list" class="upload-file-list"></ul>
+        </div>
     </div>
 
     <script src="script.js"></script>

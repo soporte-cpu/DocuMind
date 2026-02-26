@@ -79,13 +79,17 @@ def load_document(p: Path) -> str:
         return "\n".join(texts)
     if suffix == ".xlsx":
         if openpyxl is None: return ""
-        wb = openpyxl.load_workbook(str(p), data_only=True)
-        rows_text = []
-        for ws in wb.worksheets:
-            for row in ws.iter_rows(values_only=True):
-                cells = [str(c) for c in row if c not in (None, "")]
-                if cells: rows_text.append(" ".join(cells))
-        return "\n".join(rows_text)
+        try:
+            wb = openpyxl.load_workbook(str(p), data_only=True)
+            rows_text = []
+            for ws in wb.worksheets:
+                for row in ws.iter_rows(values_only=True):
+                    cells = [str(c) for c in row if c not in (None, "")]
+                    if cells: rows_text.append(" ".join(cells))
+            return "\n".join(rows_text)
+        except Exception as e:
+            print(f"      [XLSX ERROR] Error leyendo {p.name}: {e}")
+            return ""
     if suffix in {".mp3", ".mp4"}:
         return transcribe_audio(p)
     return ""
