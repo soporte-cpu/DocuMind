@@ -37,22 +37,41 @@ const kFileGrid = document.getElementById('k-file-grid');
 document.addEventListener('DOMContentLoaded', async () => {
     localStorage.setItem('documind_session', currentSessionId);
 
-    // Mobile Menu Toggle Logic
+    // Mobile Menu Toggle Logic (JS-driven for reliability)
     const menuBtn = document.getElementById('mobile-menu-btn');
     const sidebar = document.querySelector('.sidebar');
+
+    function applyMobileLayout() {
+        if (window.innerWidth <= 768) {
+            // Show the hamburger button
+            if (menuBtn) menuBtn.style.display = 'block';
+        } else {
+            // Desktop: hide button, ensure sidebar is visible
+            if (menuBtn) menuBtn.style.display = 'none';
+            if (sidebar) {
+                sidebar.classList.remove('open');
+                sidebar.style.left = '';
+            }
+        }
+    }
+
     if (menuBtn && sidebar) {
         menuBtn.onclick = () => {
             sidebar.classList.toggle('open');
         };
-        // Cerrar sidebar al tocar fuera de el
+        // Close sidebar when tapping outside
         document.addEventListener('click', (e) => {
-            if (sidebar.classList.contains('open') &&
+            if (window.innerWidth <= 768 &&
+                sidebar.classList.contains('open') &&
                 !sidebar.contains(e.target) &&
                 e.target !== menuBtn) {
                 sidebar.classList.remove('open');
             }
         });
     }
+
+    applyMobileLayout();
+    window.addEventListener('resize', applyMobileLayout);
 
     if (!localStorage.getItem('documind_token')) {
         document.getElementById('view-login').style.display = 'flex';
