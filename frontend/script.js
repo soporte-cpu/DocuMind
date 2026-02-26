@@ -37,6 +37,15 @@ const kFileGrid = document.getElementById('k-file-grid');
 document.addEventListener('DOMContentLoaded', async () => {
     localStorage.setItem('documind_session', currentSessionId);
 
+    // Mobile Menu Toggle Logic
+    const menuBtn = document.getElementById('mobile-menu-btn');
+    const sidebar = document.querySelector('.sidebar');
+    if (menuBtn) {
+        menuBtn.onclick = () => {
+            sidebar.classList.toggle('mobile-active');
+        };
+    }
+
     if (!localStorage.getItem('documind_token')) {
         document.getElementById('view-login').style.display = 'flex';
     } else {
