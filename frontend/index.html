@@ -318,9 +318,14 @@
         <div class="progress-header">
             <div style="display: flex; align-items: center; gap: 12px;">
                 <div class="loading-spinner-sm"></div>
-                <span id="progress-status-text">Subiendo archivos...</span>
+                <span id="progress-status-text" style="margin-right: 10px;">Subiendo archivos...</span>
             </div>
-            <span id="progress-percentage" class="progress-percentage">0%</span>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span id="progress-percentage" class="progress-percentage">0%</span>
+                <button class="btn-icon-sm"
+                    onclick="document.getElementById('upload-progress-panel').style.display='none'"
+                    style="border:none; background:transparent; font-size: 1.2rem;">×</button>
+            </div>
         </div>
         <div class="progress-bar-container">
             <div id="progress-bar-fill" class="progress-bar-fill" style="width: 0%;"></div>
