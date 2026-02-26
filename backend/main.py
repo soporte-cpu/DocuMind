@@ -234,9 +234,9 @@ async def chat(request: QueryRequest, db: Session = Depends(get_db), current_use
         # 2. CONTEXTUALIZACIÓN
         standalone_question = request.prompt
         if history:
-            contextualize_q_system_prompt = """Dada una conversación y la última pregunta del usuario, 
-            si la pregunta hace referencia a algo del historial (ej: "paso 5", "quien es él"), 
-            reformúlala para que sea una pregunta independiente. NO la respondas, solo reformúlala."""
+            contextualize_q_system_prompt = """Dada una conversación y una pregunta, 
+            genera una búsqueda técnica concisa. Si la pregunta es idéntica a una anterior, 
+            mantén los términos clave originales. NO respondas, solo genera la cadena de búsqueda."""
             
             contextualize_q_prompt = ChatPromptTemplate.from_messages([
                 ("system", contextualize_q_system_prompt),
@@ -246,7 +246,7 @@ async def chat(request: QueryRequest, db: Session = Depends(get_db), current_use
             
             contextualize_chain = contextualize_q_prompt | llm | StrOutputParser()
             standalone_question = contextualize_chain.invoke({
-                "chat_history": history[-5:],
+                "chat_history": history[-3:],
                 "input": request.prompt
             })
 
@@ -260,28 +260,27 @@ async def chat(request: QueryRequest, db: Session = Depends(get_db), current_use
             source = d.metadata.get('source', 'Desconocido')
             print(f"   [{i+1}] {source} | Contenido: {d.page_content[:100]}...")
         
-        # 4. GENERACIÓN DE RESPUESTA (STRICT & TECHNICAL)
-        template = """Eres DocuMind Enterprise, un asistente de auditoría técnica experto. 
-        Tu misión es responder consultas basándote en el CONTEXTO proporcionado.
+        # 4. GENERACIÓN DE RESPUESTA (TÉCNICA Y PERSISTENTE)
+        template = """Eres DocuMind Enterprise, un asistente de ingeniería experto. 
+        Tu objetivo es proporcionar datos técnicos 100% veraces basados en el CONTEXTO y el HISTORIAL.
 
-        NORMAS DE RESPUESTA:
-        1. Responde de forma precisa y profesional.
-        2. Si la información NO está clara en el CONTEXTO, indícalo educadamente: "No he encontrado información específica sobre [tema] en los documentos actuales."
-        3. Si mencionas datos técnicos (números, unidades, parámetros), cítalos TAL CUAL aparecen en el texto.
-        4. Relaciona conceptos si el contexto lo permite (ej: si el usuario pregunta por LIDAR y el documento habla de Parámetros Láser en un estudio LIDAR, úsalos).
-        5. Mantén un tono ejecutivo: directo y bien estructurado.
+        REGLAS DE ORO:
+        1. PRIORIDAD DE MEMORIA: Si la información ya fue explicada en el HISTORIAL de forma clara, úsala para mantener la coherencia.
+        2. EXTRACCIÓN LITERAL: Si el CONTEXTO tiene datos específicos (nombres de software, marcas, parámetros), cítalos textualmente.
+        3. HONESTIDAD TÉCNICA: Si tras revisar HISTORIAL y CONTEXTO no encuentras el dato, di: "No he encontrado información específica sobre ese detalle en los documentos actuales."
+        4. SIN CONTRADICCIONES: No digas que no sabes algo si ya lo respondiste correctamente hace un momento.
 
-        Área: {area_name}
+        Área Actual: {area_name}
 
-        CONTEXTO DE REFERENCIA:
+        CONTEXTO DE LOS DOCUMENTOS:
         {context}
 
-        HISTORIAL DE CONVERSACIÓN:
+        HISTORIAL DE ESTA SESIÓN:
         {history}
 
-        CONSULTA DEL USUARIO: {question}
+        PREGUNTA: {question}
 
-        RESPUESTA TÉCNICA:"""
+        RESPUESTA EXPERTA:"""
         
         prompt = ChatPromptTemplate.from_template(template)
         history_str = "\n".join([f"{'Usuario' if isinstance(m, HumanMessage) else 'IA'}: {m.content}" for m in history[-6:]])

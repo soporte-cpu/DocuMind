@@ -222,16 +222,15 @@ def get_hybrid_retriever(area: Optional[str] = None):
     faiss_kwargs = {"k": 8}
     if area: faiss_kwargs["filter"] = {"area": area}
     
-    faiss_retriever = vs.as_retriever(search_kwargs=faiss_kwargs)
+    faiss_retriever = vs.as_retriever(search_kwargs={"k": 15})
     bm25_retriever = BM25Retriever.from_documents(docs)
-    bm25_retriever.k = 8
+    bm25_retriever.k = 15
     
     # Combinar ambos (Búsqueda Híbrida)
-    # FAISS es bueno para significado semántico
-    # BM25 es excelente para términos técnicos exactos como "pospac"
+    # 0.5 / 0.5 para dar máxima importancia a términos técnicos literales
     ensemble = EnsembleRetriever(
         retrievers=[faiss_retriever, bm25_retriever],
-        weights=[0.6, 0.4]
+        weights=[0.5, 0.5]
     )
     return ensemble
 

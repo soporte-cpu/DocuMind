@@ -2,6 +2,15 @@
 
 Todas las modificaciones notables de este proyecto se documentarán en este archivo.
 
+## [1.2.1] - 2026-02-26
+### v1.2.1 Consistency Patch
+Mejoras de estabilidad en la recuperación para evitar inconsistencias en preguntas repetidas.
+
+### Corregido
+- **Consistencia de Recuperación**: Optimización del contextualizador para mantener términos técnicos originales (ej: POSPac) y evitar fallos por sobre-interpretación.
+- **Rango de Búsqueda (k=15)**: Aumento de la ventana de análisis para asegurar visibilidad de datos técnicos incluso con ruido documental.
+- **Recuperación Híbrida Balanceada**: Ajuste de pesos 50/50 entre búsqueda vectorial y palabra clave exacta.
+
 ## [1.2.0] - 2026-02-26
 ### v1.2 RAG Precision & Monitoring
 Tercera gran actualización enfocada en la fiabilidad de las respuestas técnicas y la visibilidad del estado del sistema.
