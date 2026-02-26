@@ -60,9 +60,13 @@ class QueryRequest(BaseModel):
     session_id: Optional[str] = "default"
     area: Optional[str] = None # Filtro por área temática
 
+class SourceDetail(BaseModel):
+    name: str
+    content: str
+
 class QueryResponse(BaseModel):
     answer: str
-    sources: List[str]
+    sources: List[SourceDetail]
 
 class Token(BaseModel):
     access_token: str
@@ -250,19 +254,34 @@ async def chat(request: QueryRequest, db: Session = Depends(get_db), current_use
         docs = retriever.invoke(standalone_question)
         context_text = "\n\n".join(doc.page_content for doc in docs)
         
-        # 4. GENERACIÓN DE RESPUESTA
-        template = """Eres DocuMind, un asistente experto. Responde usando el CONTEXTO y el HISTORIAL.
-        Área actual: {area_name}
+        # DEBUG: Ver qué está leyendo la IA
+        print(f"[DEBUG] Chunks recuperados: {len(docs)}")
+        for i, d in enumerate(docs):
+            source = d.metadata.get('source', 'Desconocido')
+            print(f"   [{i+1}] {source} | Contenido: {d.page_content[:100]}...")
+        
+        # 4. GENERACIÓN DE RESPUESTA (STRICT & TECHNICAL)
+        template = """Eres DocuMind Enterprise, un asistente de auditoría técnica experto. 
+        Tu misión es responder consultas basándote en el CONTEXTO proporcionado.
 
-        CONTEXTO TÉCNICO:
+        NORMAS DE RESPUESTA:
+        1. Responde de forma precisa y profesional.
+        2. Si la información NO está clara en el CONTEXTO, indícalo educadamente: "No he encontrado información específica sobre [tema] en los documentos actuales."
+        3. Si mencionas datos técnicos (números, unidades, parámetros), cítalos TAL CUAL aparecen en el texto.
+        4. Relaciona conceptos si el contexto lo permite (ej: si el usuario pregunta por LIDAR y el documento habla de Parámetros Láser en un estudio LIDAR, úsalos).
+        5. Mantén un tono ejecutivo: directo y bien estructurado.
+
+        Área: {area_name}
+
+        CONTEXTO DE REFERENCIA:
         {context}
 
-        HISTORIAL:
+        HISTORIAL DE CONVERSACIÓN:
         {history}
 
-        PREGUNTA: {question}
+        CONSULTA DEL USUARIO: {question}
 
-        RESPUESTA:"""
+        RESPUESTA TÉCNICA:"""
         
         prompt = ChatPromptTemplate.from_template(template)
         history_str = "\n".join([f"{'Usuario' if isinstance(m, HumanMessage) else 'IA'}: {m.content}" for m in history[-6:]])
@@ -282,8 +301,37 @@ async def chat(request: QueryRequest, db: Session = Depends(get_db), current_use
         db.add(assistant_msg)
         db.commit()
         
-        sources = list(set([doc.metadata.get("source", "N/A") for doc in docs]))
-        return QueryResponse(answer=answer, sources=sources)
+        # 6. Recolectar fuentes con contenido para Citas Verificables (Filtradas por Relevancia)
+        source_details = []
+        unique_sources = {} # {filename: content_summary}
+        
+        # Palabras clave de la respuesta para un filtro rápido
+        answer_lower = answer.lower()
+        
+        for doc in docs:
+            snippet = doc.page_content.strip()
+            filename = doc.metadata.get("source", "Desconocido")
+            
+            # Filtro de Relevancia: ¿El snippet aporta algo a la respuesta?
+            # Comprobamos si palabras importantes del snippet están en la respuesta
+            snippet_words = set(snippet.lower().split())
+            query_words = set(standalone_question.lower().split())
+            
+            # Si el snippet contiene términos clave de la pregunta Y algo de su texto está en la respuesta, es relevante
+            is_relevant = any(word in answer_lower for word in snippet_words if len(word) > 4)
+            
+            if is_relevant:
+                if filename not in unique_sources:
+                    unique_sources[filename] = snippet
+                else:
+                    # Si ya existe, acumulamos un poco más de contexto si no es repetido
+                    if snippet[:50] not in unique_sources[filename]:
+                        unique_sources[filename] += "\n\n[...]\n\n" + snippet
+        
+        for name, content in unique_sources.items():
+            source_details.append(SourceDetail(name=name, content=content))
+                
+        return QueryResponse(answer=answer, sources=source_details)
     except Exception as e:
         print(f"[ERROR CHAT] Ocurrió un fallo: {str(e)}")
         import traceback
@@ -473,7 +521,26 @@ async def upload_file(background_tasks: BackgroundTasks, file: UploadFile = File
     
     return {"filename": file.filename, "status": "uploaded", "index_status": "queued"}
 
-# Rutas para el Frontend (Al final para no interferir con las rutas de API)
+@app.post("/reprocess")
+async def reprocess_docs(background_tasks: BackgroundTasks, current_user: models.User = Depends(auth.check_admin_role)):
+    """Borra el índice actual y reprocesa todos los documentos físicamente."""
+    global is_indexing
+    if is_indexing:
+        raise HTTPException(status_code=400, detail="Ya se está realizando una indexación.")
+    
+    is_indexing = True
+    
+    def run_reprocess():
+        global is_indexing
+        try:
+            update_vector_store(force_reprocess=True)
+        finally:
+            is_indexing = False
+            
+    background_tasks.add_task(run_reprocess)
+    return {"message": "Reprocesamiento total iniciado en segundo plano."}
+
+# Rutas para el Frontend
 FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
 
 @app.get("/")

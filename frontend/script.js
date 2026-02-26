@@ -449,6 +449,35 @@ async function deleteArea(areaId) {
     } catch (e) { console.error("Error al borrar área:", e); }
 }
 
+async function reprocessDocuments() {
+    if (!confirm("Esto borrará el índice actual y volverá a leer TODOS los documentos físicos para aplicar las mejoras de precisión. ¿Continuar?")) return;
+
+    const panel = document.getElementById('upload-progress-panel');
+    const statusText = document.getElementById('progress-status-text');
+    const barFill = document.getElementById('progress-bar-fill');
+    const fileList = document.getElementById('upload-file-list');
+
+    panel.style.display = 'block';
+    statusText.innerText = "Iniciando reprocesamiento integral...";
+    barFill.style.width = '10%';
+    fileList.innerHTML = '<li>Limpiando índices antiguos...</li>';
+
+    try {
+        const res = await authFetch(`${API_BASE}/reprocess`, { method: 'POST' });
+        if (res.ok) {
+            statusText.innerText = "Reprocesando archivos físicos...";
+            checkIndexingStatus();
+        } else {
+            const data = await res.json();
+            alert("Error: " + (data.detail || "No se pudo iniciar."));
+            panel.style.display = 'none';
+        }
+    } catch (e) {
+        console.error(e);
+        panel.style.display = 'none';
+    }
+}
+
 // Chat functions
 async function loadHistory() {
     try {
@@ -460,7 +489,7 @@ async function loadHistory() {
             div.className = `history-item ${item.session_id === currentSessionId ? 'active' : ''}`;
             div.innerHTML = `
                 <span class="history-name" title="${item.title}">${item.title}</span>
-                <button class="delete-chat-btn" onclick="event.stopPropagation(); deleteHistoryItem('${item.session_id}')">×</button>
+                <button class="delete-chat-btn" onclick="event.stopPropagation(); deleteHistoryItem('${item.session_id}')">✕</button>
             `;
             div.onclick = () => switchChat(item.session_id);
             historyContainer.appendChild(div);
@@ -546,7 +575,26 @@ async function sendMessage() {
 function appendMessage(role, content, isLoading = false, sources = []) {
     const msgDiv = document.createElement('div');
     msgDiv.className = `message-bubble ${role}`;
-    let sourcesHtml = (sources?.length > 0) ? `<div class="source-container" style="margin-top:10px; display:flex; gap:5px; flex-wrap:wrap;">${sources.map(s => `<span style="font-size:0.7rem; padding:2px 6px; background:#f1f5f9; border-radius:4px;">${s}</span>`).join('')}</div>` : '';
+
+    let sourcesHtml = '';
+    if (sources && sources.length > 0) {
+        sourcesHtml = `<div class="source-container" style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">`;
+        sources.forEach((s) => {
+            // 's' es ahora un objeto {name: string, content: string}
+            const sName = (typeof s === 'string') ? s : (s.name || "Desconocido");
+            const sContent = (typeof s === 'string') ? "" : (s.content || "");
+
+            // Extraemos solo el nombre del archivo si es una ruta larga
+            const displayName = sName.split(/[\\/]/).pop();
+
+            // Escapar contenido para el atributo simple
+            const escapedContent = sContent.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+            sourcesHtml += `<span class="source-tag" onclick="showSourceDetail('${displayName}', \`${escapedContent}\`)" title="Ver cita original">📄 ${displayName}</span>`;
+        });
+        sourcesHtml += `</div>`;
+    }
+
     msgDiv.innerHTML = `
         <div class="bubble-avatar">${role === 'assistant' ? 'DM' : 'YO'}</div>
         <div class="bubble-content">
@@ -557,6 +605,13 @@ function appendMessage(role, content, isLoading = false, sources = []) {
     chatBox.appendChild(msgDiv);
     chatBox.scrollTop = chatBox.scrollHeight;
     return msgDiv;
+}
+
+function showSourceDetail(name, content) {
+    const modal = document.getElementById('source-modal');
+    document.getElementById('source-modal-title').innerText = `Fuente: ${name}`;
+    document.getElementById('source-modal-content').innerText = content || "No hay fragmento disponible para esta cita.";
+    modal.style.display = 'flex';
 }
 
 function setupAutoResize() {
@@ -576,4 +631,11 @@ document.getElementById('file-search').oninput = function () {
 
 sendBtn.onclick = sendMessage;
 userInput.onkeydown = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } };
-window.onclick = (e) => { if (e.target.classList.contains('modal-bg')) closeAreaModal(); };
+window.onclick = (e) => {
+    if (e.target.classList.contains('modal-bg')) {
+        e.target.style.display = 'none';
+        // También cerramos modales específicos si tienen funciones dedicadas
+        if (e.target.id === 'area-modal') closeAreaModal();
+        if (e.target.id === 'user-modal') closeUserModal();
+    }
+};

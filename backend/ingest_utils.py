@@ -56,7 +56,14 @@ def load_document(p: Path) -> str:
     if suffix == ".docx":
         if docx is None: return ""
         d = docx.Document(str(p))
-        return "\n".join(par.text for par in d.paragraphs)
+        full_text = []
+        for par in d.paragraphs:
+            full_text.append(par.text)
+        for table in d.tables:
+            for row in table.rows:
+                for cell in row.cells:
+                    full_text.append(cell.text)
+        return "\n".join(full_text)
     if suffix in {".html", ".htm"}:
         if BeautifulSoup is None: return ""
         html = p.read_text(encoding="utf-8", errors="ignore")
@@ -104,13 +111,19 @@ def transcribe_audio(p: Path) -> str:
         print(f"Error transcribiendo {p.name}: {e}")
         return ""
 
-def update_vector_store():
-    """Escanea la carpeta docs y regenera el índice FAISS."""
+def update_vector_store(force_reprocess: bool = False):
+    """Escanea la carpeta docs y regenera el índice FAISS. Si force_reprocess es True, borra el índice anterior."""
+    if force_reprocess and EMBEDDINGS_DIR.exists():
+        print("[INFO] Forzando reprocesamiento: Borrando índices antiguos...")
+        import shutil
+        shutil.rmtree(EMBEDDINGS_DIR)
+        EMBEDDINGS_DIR.mkdir(parents=True, exist_ok=True)
+
     if not DOCS_DIR.exists():
         DOCS_DIR.mkdir(parents=True, exist_ok=True)
         return
 
-    splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=250)
+    splitter = RecursiveCharacterTextSplitter(chunk_size=800, chunk_overlap=200)
     texts: List[str] = []
     metadatas: List[Dict[str, str]] = []
 
@@ -206,12 +219,12 @@ def get_hybrid_retriever(area: Optional[str] = None):
     docs = [Document(page_content=t, metadata=m) for t, m in zip(filtered_texts, filtered_metadatas)]
     
     # Inicializar retrievers
-    faiss_kwargs = {"k": 5}
+    faiss_kwargs = {"k": 8}
     if area: faiss_kwargs["filter"] = {"area": area}
     
     faiss_retriever = vs.as_retriever(search_kwargs=faiss_kwargs)
     bm25_retriever = BM25Retriever.from_documents(docs)
-    bm25_retriever.k = 5
+    bm25_retriever.k = 8
     
     # Combinar ambos (Búsqueda Híbrida)
     # FAISS es bueno para significado semántico

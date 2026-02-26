@@ -2,6 +2,26 @@
 
 Todas las modificaciones notables de este proyecto se documentarán en este archivo.
 
+## [1.2.0] - 2026-02-26
+### v1.2 RAG Precision & Monitoring
+Tercera gran actualización enfocada en la fiabilidad de las respuestas técnicas y la visibilidad del estado del sistema.
+
+### Añadido
+- **Panel de Progreso en Tiempo Real**: Notificaciones estilo Glassmorphism para monitorear subidas e indexación (RAG) en directo.
+- **Botón de Reprocesamiento Integral**: Función para reconstruir toda la base de conocimientos con un solo clic.
+- **Extractor de Tablas DOCX**: Soporte completo para leer datos estructurados dentro de tablas de Microsoft Word.
+- **Visualizador de Citas Expandido**: Modal profesional para ver el fragmento exacto del documento de donde proviene la información.
+
+### Mejoras de Inteligencia (RAG)
+- **Chunking Quirúrgico**: Ajuste del tamaño de fragmentación a 800 caracteres para mejor balance entre contexto y precisión.
+- **Filtro de Relevancia Semántica**: Las fuentes ahora se filtran automáticamente para eliminar ruidos y documentos irrelevantes en la respuesta.
+- **Prompt de Auditoría Técnica**: Refinamiento del motor para citar datos técnicos textualmente y mejorar el conteo de elementos.
+- **Búsqueda Híbrida Optimizada**: Aumento del margen de recuperación (k=12) y ajuste de pesos para términos técnicos exactos.
+
+### Correciones (UI/UX)
+- **Refinamiento de Historial**: Botón de eliminar chat rediseñado con animaciones más suaves y símbolo más nítido.
+- **Deduplicación de Fuentes**: Agrupación inteligente de etiquetas de documentos para evitar saturación visual.
+
 ## [1.1.0] - 2026-02-25
 ### v1.1 UI Restoration & User Management
 Segunda gran actualización centrada en el refinamiento estético y la seguridad de acceso.
