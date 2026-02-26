@@ -72,4 +72,4 @@ documind-enterprise/
 ```
 
 ---
-*Hecho con Antigravity AI - v1.4.0 Area Intelligence Edition*
+*Desarrollado con pasión por **Juan Pablo Erices** & Antigravity AI - v1.4.0 Area Intelligence Edition*
