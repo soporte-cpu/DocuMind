@@ -9,9 +9,10 @@ from pydantic import BaseModel
 from typing import List, Dict, Optional
 from .ingest_utils import update_vector_store, get_vector_store, get_hybrid_retriever, DOCS_DIR
 from .database import engine, get_db
-from . import models
+from . import models, auth
 from sqlalchemy.orm import Session
-from fastapi import Depends
+from fastapi import Depends, Form
+from fastapi.security import OAuth2PasswordRequestForm
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables import RunnablePassthrough
@@ -21,6 +22,18 @@ from dotenv import load_dotenv
 
 # Crear tablas al iniciar
 models.Base.metadata.create_all(bind=engine)
+
+# Crear usuario admin inicial si no existe
+def create_initial_admin():
+    db = next(get_db())
+    if db.query(models.User).count() == 0:
+        print("[AUTH] Creando usuario administrador inicial (admin/admin)")
+        hashed_pwd = auth.get_password_hash("admin")
+        admin_user = models.User(username="admin", hashed_password=hashed_pwd, role="admin")
+        db.add(admin_user)
+        db.commit()
+
+create_initial_admin()
 
 load_dotenv()
 
@@ -51,9 +64,129 @@ class QueryResponse(BaseModel):
     answer: str
     sources: List[str]
 
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class UserCreate(BaseModel):
+    username: str
+    password: str
+    full_name: Optional[str] = None
+    email: Optional[str] = None
+    role: Optional[str] = "viewer"
+    is_active: Optional[int] = 1
+
+class UserUpdate(BaseModel):
+    full_name: Optional[str] = None
+    email: Optional[str] = None
+    password: Optional[str] = None # Solo si se quiere cambiar
+    role: Optional[str] = None
+    is_active: Optional[int] = None
+
+@app.post("/register", response_model=Token)
+async def register(user_data: UserCreate, db: Session = Depends(get_db)):
+    db_user = db.query(models.User).filter(models.User.username == user_data.username).first()
+    if db_user:
+        raise HTTPException(status_code=400, detail="El usuario ya existe")
+    
+    hashed_pwd = auth.get_password_hash(user_data.password)
+    new_user = models.User(
+        username=user_data.username, 
+        hashed_password=hashed_pwd,
+        role=user_data.role if user_data.role in ["admin", "viewer"] else "viewer"
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    
+    access_token = auth.create_access_token(data={"sub": new_user.username})
+    return {"access_token": access_token, "token_type": "bearer"}
+
+@app.post("/login", response_model=Token)
+async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.username == form_data.username).first()
+    if not user or not auth.verify_password(form_data.password, user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Usuario o contraseña incorrectos",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    access_token = auth.create_access_token(data={"sub": user.username})
+    return {"access_token": access_token, "token_type": "bearer"}
+
+@app.get("/me")
+async def read_users_me(current_user: models.User = Depends(auth.get_current_user)):
+    return {"username": current_user.username, "role": current_user.role}
+
+# --- GESTIÓN DE USUARIOS (ADMIN ONLY) ---
+
+@app.get("/users")
+async def list_users(db: Session = Depends(get_db), admin: models.User = Depends(auth.check_admin_role)):
+    users = db.query(models.User).all()
+    return [{
+        "id": u.id, 
+        "username": u.username, 
+        "full_name": u.full_name,
+        "email": u.email,
+        "role": u.role, 
+        "is_active": u.is_active,
+        "created_at": u.created_at
+    } for u in users]
+
+@app.post("/users")
+async def admin_create_user(user_data: UserCreate, db: Session = Depends(get_db), admin: models.User = Depends(auth.check_admin_role)):
+    db_user = db.query(models.User).filter(models.User.username == user_data.username).first()
+    if db_user:
+        raise HTTPException(status_code=400, detail="El usuario ya existe")
+    
+    hashed_pwd = auth.get_password_hash(user_data.password)
+    new_user = models.User(
+        username=user_data.username, 
+        full_name=user_data.full_name,
+        email=user_data.email,
+        hashed_password=hashed_pwd,
+        role=user_data.role if user_data.role in ["admin", "viewer"] else "viewer",
+        is_active=user_data.is_active
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return {"status": "created", "username": new_user.username}
+
+@app.patch("/users/{user_id}")
+async def admin_update_user(user_id: int, user_data: UserUpdate, db: Session = Depends(get_db), admin: models.User = Depends(auth.check_admin_role)):
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    
+    if user_data.full_name is not None: user.full_name = user_data.full_name
+    if user_data.email is not None: user.email = user_data.email
+    if user_data.role is not None: user.role = user_data.role
+    if user_data.is_active is not None: user.is_active = user_data.is_active
+    
+    if user_data.password:
+        user.hashed_password = auth.get_password_hash(user_data.password)
+        
+    db.commit()
+    return {"status": "updated"}
+
+@app.delete("/users/{user_id}")
+async def delete_user(user_id: int, db: Session = Depends(get_db), admin: models.User = Depends(auth.check_admin_role)):
+    if admin.id == user_id:
+        raise HTTPException(status_code=400, detail="No puedes borrarte a ti mismo")
+    
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        
+    db.delete(user)
+    db.commit()
+    return {"status": "deleted"}
+
 
 @app.post("/chat", response_model=QueryResponse)
-async def chat(request: QueryRequest, db: Session = Depends(get_db)):
+async def chat(request: QueryRequest, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
     try:
         # Cargar retriever con filtro de área si existe
         retriever = get_hybrid_retriever(area=request.area)
@@ -71,7 +204,12 @@ async def chat(request: QueryRequest, db: Session = Depends(get_db)):
             except:
                 chat_title = request.prompt[:50]
                 
-            chat_db = models.ChatTurn(session_id=request.session_id, area_id=None, title=chat_title)
+            chat_db = models.ChatTurn(
+                session_id=request.session_id, 
+                area_id=None, 
+                title=chat_title,
+                user_id=current_user.id
+            )
             db.add(chat_db)
             db.commit()
             db.refresh(chat_db)
@@ -153,7 +291,7 @@ async def chat(request: QueryRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/areas")
-async def list_areas(db: Session = Depends(get_db)):
+async def list_areas(db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
     """Lista las áreas desde la DB, sincronizando con carpetas físicas."""
     try:
         db_areas = db.query(models.Area).all()
@@ -182,7 +320,7 @@ async def list_areas(db: Session = Depends(get_db)):
         return [{"id": a.id, "name": a.name, "icon": a.icon, "description": a.description} for a in db_areas]
 
 @app.post("/areas")
-async def create_area(name: str, icon: str = "📁", db: Session = Depends(get_db)):
+async def create_area(name: str, icon: str = "📁", db: Session = Depends(get_db), admin_user: models.User = Depends(auth.check_admin_role)):
     area_path = DOCS_DIR / name
     if area_path.exists():
         raise HTTPException(status_code=400, detail="El nombre de carpeta ya existe")
@@ -195,7 +333,7 @@ async def create_area(name: str, icon: str = "📁", db: Session = Depends(get_d
     return new_area
 
 @app.patch("/areas/{area_id}")
-async def update_area(area_id: int, name: Optional[str] = None, icon: Optional[str] = None, db: Session = Depends(get_db)):
+async def update_area(area_id: int, name: Optional[str] = None, icon: Optional[str] = None, db: Session = Depends(get_db), admin_user: models.User = Depends(auth.check_admin_role)):
     area = db.query(models.Area).filter(models.Area.id == area_id).first()
     if not area: raise HTTPException(status_code=404)
     
@@ -215,7 +353,7 @@ async def update_area(area_id: int, name: Optional[str] = None, icon: Optional[s
     return area
 
 @app.delete("/areas/{area_id}")
-async def delete_area(area_id: int, db: Session = Depends(get_db)):
+async def delete_area(area_id: int, db: Session = Depends(get_db), admin_user: models.User = Depends(auth.check_admin_role)):
     area = db.query(models.Area).filter(models.Area.id == area_id).first()
     if not area: raise HTTPException(status_code=404)
     
@@ -229,9 +367,14 @@ async def delete_area(area_id: int, db: Session = Depends(get_db)):
     return {"status": "deleted"}
 
 @app.get("/history")
-async def get_all_history(db: Session = Depends(get_db)):
-    """Obtiene la lista de conversaciones guardadas."""
-    chats = db.query(models.ChatTurn).order_by(models.ChatTurn.created_at.desc()).all()
+async def get_all_history(db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    """Obtiene la lista de conversaciones guardadas filtradas por el usuario actual."""
+    query = db.query(models.ChatTurn)
+    # Si no es admin, solo ve lo suyo
+    if current_user.role != "admin":
+        query = query.filter(models.ChatTurn.user_id == current_user.id)
+        
+    chats = query.order_by(models.ChatTurn.created_at.desc()).all()
     return [{"session_id": c.session_id, "title": c.title, "area": c.area.name if c.area else "General"} for c in chats]
 
 @app.get("/history/{session_id}")
@@ -284,7 +427,7 @@ async def list_files():
     return files
 
 @app.delete("/files/{area}/{filename:path}")
-async def delete_file(area: str, filename: str):
+async def delete_file(area: str, filename: str, admin_user: models.User = Depends(auth.check_admin_role)):
     """Elimina un archivo específico de un área (soporta rutas)."""
     if area == "General":
         file_path = DOCS_DIR / filename
@@ -311,7 +454,7 @@ def wrap_update_vector_store():
         is_indexing = False
 
 @app.post("/upload")
-async def upload_file(background_tasks: BackgroundTasks, file: UploadFile = File(...), area: Optional[str] = None, subfolder: Optional[str] = None):
+async def upload_file(background_tasks: BackgroundTasks, file: UploadFile = File(...), area: Optional[str] = None, subfolder: Optional[str] = None, admin_user: models.User = Depends(auth.check_admin_role)):
     target_dir = DOCS_DIR
     if area and area != "General":
         target_dir = DOCS_DIR / area
