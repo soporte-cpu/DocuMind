@@ -46,4 +46,28 @@ Transformar DocuMind en una herramienta que permita a las empresas subir estánd
 *   **Score de Preparación**: Un porcentaje de "Listo para certificación" en tiempo real.
 
 ---
+
+## ❓ Levantamiento de Requisitos (Pre-arranque v2.0)
+
+> Estas preguntas deben responderse con los stakeholders antes de iniciar el desarrollo de la Fase 1.
+
+### 1. Sobre el Estándar / Norma
+- ¿Qué tipo de certificación o normativa se quiere analizar? *(ISO 9001, ISO 14001, ISO 45001, ley local, requerimiento de cliente, norma interna)*
+- ¿El documento del estándar está disponible en formato PDF, Word u otro?
+- ¿El estándar tiene cláusulas numeradas? *(ej: "4.1 Contexto de la organización")* — clave para la segmentación automática.
+
+### 2. Sobre los Documentos Internos
+- ¿Qué tipo de documentos se usarán como evidencia de cumplimiento? *(procedimientos, registros, manuales, actas, certificados)*
+- ¿Ya están organizados en áreas dentro de DocuMind, o se cargarán específicamente para este módulo?
+
+### 3. Sobre el Resultado Final
+- ¿El reporte de brecha es para uso interno *(toma de decisiones)* o para presentar a un auditor externo?
+- ¿Se necesita exportar el resultado? *(PDF formal, Excel de checklist, Word editable)*
+- ¿Cuántas personas usarán este módulo? *(individual, equipo, clientes)*
+
+### 4. Sobre el Nivel de Automatización
+- ¿Se quiere que la IA realice toda la comparación de forma automática, o el usuario también podrá marcar manualmente el estado de cumplimiento?
+- ¿Hay un flujo de aprobación antes de generar el reporte final? *(revisor/auditor interno)*
+
+---
 *Documento generado y mantenido por el equipo de ingeniería de DocuMind.*
