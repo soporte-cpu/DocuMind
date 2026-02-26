@@ -11,22 +11,21 @@ Transformar DocuMind en una herramienta que permita a las empresas subir estánd
 
 ## 🛣️ Fases de Desarrollo
 
-### Fase 1: Motor de Comparación Semántica (El Cerebro)
-*   **Gestión de Estándares Maestros**: Nueva sección para subir documentos de referencia que actúen como "Reglas de Cumplimiento".
-*   **Segmentación por Cláusulas**: Parser inteligente para identificar capítulos, artículos y requisitos específicos dentro de los estándares.
-*   **Análisis de Evidencia Cross-Document**: Lógica de IA que recorre la base de documentos de la empresa buscando pruebas para cada punto de la norma.
+### Fase 1: Motor de Comparación y Metadatos (El Cerebro)
+*   **Gestión de Estándares Maestros**: Nueva sección para subir documentos de referencia (Reglas de Cumplimiento).
+*   **Extracción Automática de Metadatos (Smart Tagger)**: Uso de IA para identificar fechas de vencimiento, entidades, tipos de documento y estados (firmado/pendiente) al momento de la carga.
+*   **Segmentación por Cláusulas**: Parser inteligente para identificar requisitos específicos dentro de los estándares.
+*   **Análisis de Evidencia Cross-Document**: Lógica de IA que busca pruebas para cada punto de la norma usando metadatos como filtro de veracidad.
 
 ### Fase 2: Módulo "Compliance Dashboard" (La Interfaz)
-*   **Matriz de Cumplimiento (Semáforo)**:
-    *   🟢 **Cumple**: Evidencia clara encontrada. Se vincula al documento original.
-    *   🟡 **Observación**: Evidencia parcial o ambigua. Requiere revisión humana.
-    *   🔴 **Brecha (Gap)**: No se encontró documentación que respalde el requisito.
-*   **Auditoría Interactiva**: Al hacer clic en un requerimiento, mostrar el fragmento exacto del documento de la empresa que justifica el cumplimiento.
+*   **Matriz de Cumplimiento (Semáforo)**: visualización 🟢🟡🔴 basada en la evidencia encontrada.
+*   **Timeline de Eventos**: Línea de tiempo automática basada en las fechas extraídas de los metadatos de los documentos.
+*   **Auditoría Interactiva**: Al hacer clic en un requerimiento, mostrar el fragmento exacto del documento de la empresa.
 
 ### Fase 3: Generación de Informes y Acción (El Valor Agregado)
-*   **Gap Report Generativo**: Creación automática de reportes ejecutivos (PDF/DOCX) resumiendo el estado de la certificación.
-*   **Asistente de Redacción de Políticas**: La IA podrá sugerir el texto inicial para los procedimientos faltantes basándose en la norma.
-*   **Múltiples Marcos Normativos**: Capacidad de comparar un mismo documento contra diferentes estándares simultáneamente.
+*   **Gap Report Generativo**: Creación de reportes ejecutivos (PDF/DOCX) con resumen de brechas.
+*   **Gestión de Alertas**: Notificaciones automáticas cuando un metadato de "vencimiento" esté próximo a cumplirse.
+*   **Asistente de Redacción de Políticas**: Sugerencias de texto inicial para procedimientos faltantes.
 
 ---
 
@@ -34,10 +33,10 @@ Transformar DocuMind en una herramienta que permita a las empresas subir estánd
 
 | Tarea | Detalle | Estado |
 | :--- | :--- | :--- |
-| **Pestaña "Normativa"** | Interfaz para gestionar estándares de referencia. | 🗓️ Pendiente |
+| **Pestaña "Normativa"** | Interfaz inicial para gestionar estándares. | 🗓️ Pendiente |
+| **Motor de Metadatos** | Extracción de Fechas, Empresas y Tipos de Doc. | 🗓️ Pendiente |
+| **Filtros Avanzados** | Búsqueda RAG filtrada por año o estado del documento. | 🗓️ Pendiente |
 | **Prompt de Análisis de Brecha** | Lógica RAG especializada en comparación de normas. | 🗓️ Pendiente |
-| **Visor de Evidencias** | Mejora del visor actual para anclarlo a requisitos legales. | 🗓️ Pendiente |
-| **Exportación de Auditoría** | Generador de reportes de cumplimiento preliminares. | 🗓️ Pendiente |
 
 ---
 
