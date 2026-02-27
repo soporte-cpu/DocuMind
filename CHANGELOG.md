@@ -2,6 +2,19 @@
 
 Todas las modificaciones notables de este proyecto se documentarán en este archivo.
 
+## [1.4.2] - 2026-02-27
+### v1.4.2 UI Resilience & Feedback
+Séptima actualización enfocada en el feedback de usuario en puntos críticos y estabilidad de descarga.
+
+### Añadido
+- **Login Shake Experience**: Animación visual de sacudida y mensajes detallados con iconos para errores de credenciales (vía `shake` keyframes).
+- **Icono de Descarga Directa**: Botón ⬇️ en cada tarjeta de archivo para bajar documentos sin usar el chat.
+- **Trace de Seguridad**: Sistema de logs detallado en el backend para diagnosticar fallos en tokens JWT.
+
+### Corregido
+- **Error "Session Expired"**: Estabilización de la validación de credenciales para descargas directas desde el navegador.
+- **Mensajes de Conexión**: Feedback claro cuando el servidor no responde vs. cuando la contraseña es incorrecta.
+
 ## [1.4.1] - 2026-02-26
 ### v1.4.1 Bulk Stability & Elite UI
 Sexta actualización enfocada en la robustez operativa para cargas masivas de datos y el refinamiento de la interfaz de usuario.

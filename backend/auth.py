@@ -56,12 +56,14 @@ async def get_current_user(
     
     # 1. Buscar en Query Params (Prioridad para descargas)
     token = request.query_params.get("token")
+    source = "URL"
     
     # 2. Buscar en Headers si no está en Query
     if not token:
         auth_header = request.headers.get("Authorization")
         if auth_header and auth_header.lower().startswith("bearer "):
             token = auth_header.split(" ")[1]
+            source = "HEADER"
     
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -70,22 +72,29 @@ async def get_current_user(
     )
 
     if not token or str(token).lower() in ["null", "undefined", "none", ""]:
-        # print("[AUTH] Error: Token no encontrado en URL ni en cabecera")
+        print(f"[AUTH ERROR] Token ausente o inválido (Source: {source})")
         raise credentials_exception
 
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         if username is None:
-            raise credentials_exception
-    except JWTError:
-        raise credentials_exception
+            print(f"[AUTH ERROR] Payload no contiene 'sub' (Source: {source})")
+            raise HTTPException(status_code=401, detail="Token malformado: falta 'sub'")
+    except jwt.ExpiredSignatureError:
+        print(f"[AUTH ERROR] Token expirado (Source: {source})")
+        raise HTTPException(status_code=401, detail="La sesión ha expirado")
+    except JWTError as e:
+        print(f"[AUTH ERROR] Error de decodificación JWT ({e}) (Source: {source})")
+        raise HTTPException(status_code=401, detail=f"Credenciales inválidas: {str(e)}")
     
     user = db.query(models.User).filter(models.User.username == username).first()
     if user is None:
+        print(f"[AUTH ERROR] Usuario '{username}' no encontrado en DB (Source: {source})")
         raise credentials_exception
     
     if not user.is_active:
+        print(f"[AUTH ERROR] Intento de acceso con cuenta desactivada: {username}")
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Cuenta desactivada. Contacte con el administrador."

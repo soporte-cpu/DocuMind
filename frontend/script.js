@@ -270,12 +270,23 @@ async function handleLogin() {
             localStorage.setItem('documind_token', data.access_token);
             await initApp();
         } else {
-            const data = await res.json();
-            err.innerText = data.detail || "Error al iniciar sesión";
+            let errorMessage = "Error al iniciar sesión";
+            try {
+                const data = await res.json();
+                errorMessage = data.detail || errorMessage;
+            } catch (e) { }
+
+            err.innerHTML = `<span style="font-size:1.1rem; margin-right:8px;">⚠️</span> ${errorMessage}`;
             err.style.display = 'block';
+
+            // Animación de sacudida para feedback táctil-visual
+            const card = document.querySelector('.login-card');
+            card.style.animation = 'none';
+            void card.offsetWidth; // Trigger reflow
+            card.style.animation = 'shake 0.4s cubic-bezier(.36,.07,.19,.97) both';
         }
     } catch (e) {
-        err.innerText = "Error de conexión";
+        err.innerHTML = `<span style="font-size:1.1rem; margin-right:8px;">📡</span> Sin conexión con el servidor`;
         err.style.display = 'block';
     }
 }
@@ -400,7 +411,10 @@ async function loadFilesForArea(areaName) {
             card.className = 'file-card';
             card.setAttribute('data-ext', ext);
             card.innerHTML = `
-                <button class="file-delete-btn" onclick="deleteFile('${f.area}', '${f.name}')">×</button>
+                <div class="file-card-actions">
+                    <button class="file-action-btn dl" onclick="downloadFile('${f.area}', '${f.name}')" title="Descargar">⬇️</button>
+                    <button class="file-action-btn del is-admin-only" onclick="deleteFile('${f.area}', '${f.name}')" title="Borrar">×</button>
+                </div>
                 <div class="file-icon-box">
                     <span class="file-tag">${ext}</span>
                 </div>
@@ -582,6 +596,18 @@ async function reprocessDocuments() {
         console.error(e);
         panel.style.display = 'none';
     }
+}
+
+function downloadFile(area, name) {
+    const token = localStorage.getItem('documind_token');
+    if (!token) {
+        alert("Su sesión ha expirado.");
+        return;
+    }
+    const encodedArea = encodeURIComponent(area);
+    const encodedName = encodeURIComponent(name);
+    const url = `${API_BASE}/document/download/${encodedArea}/${encodedName}?token=${token}`;
+    window.open(url, '_blank');
 }
 
 // Chat functions
