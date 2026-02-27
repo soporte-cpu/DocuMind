@@ -232,7 +232,14 @@ async def chat(request: QueryRequest, db: Session = Depends(get_db), current_use
             db.commit()
             db.refresh(chat_db)
         
-        # Cargar mensajes previos
+        # --- NUEVO: Guardar la pregunta del usuario inmediatamente para que no se pierda ---
+        user_msg = models.Message(chat_id=chat_db.id, role="user", content=request.prompt)
+        db.add(user_msg)
+        db.commit()
+        db.refresh(user_msg)
+
+        # Cargar mensajes previos (incluyendo el recién guardado para el contexto si fuera necesario, 
+        # aunque aquí lo sacamos del request.prompt para standalone_question)
         db_messages = db.query(models.Message).filter(models.Message.chat_id == chat_db.id).order_by(models.Message.created_at.asc()).all()
         history: List[BaseMessage] = []
         for msg in db_messages:
@@ -326,8 +333,7 @@ async def chat(request: QueryRequest, db: Session = Depends(get_db), current_use
                 total_tokens=tk.get('total_tokens', 0)
             )
 
-        # 5. Guardar en Base de Datos (Con Tokens)
-        user_msg = models.Message(chat_id=chat_db.id, role="user", content=request.prompt)
+        # 5. Guardar Respuesta de la IA en Base de Datos (Con Tokens)
         assistant_msg = models.Message(
             chat_id=chat_db.id, 
             role="assistant", 
@@ -335,7 +341,6 @@ async def chat(request: QueryRequest, db: Session = Depends(get_db), current_use
             prompt_tokens=usage_info.prompt_tokens if usage_info else 0,
             completion_tokens=usage_info.completion_tokens if usage_info else 0
         )
-        db.add(user_msg)
         db.add(assistant_msg)
         db.commit()
         
