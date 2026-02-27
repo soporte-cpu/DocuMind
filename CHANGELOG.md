@@ -2,6 +2,20 @@
 
 Todas las modificaciones notables de este proyecto se documentarán en este archivo.
 
+## [1.5.0] - 2026-02-27
+### v1.5.0 Privacy Shield & Consumption Guard
+Undécima actualización centrada en el blindaje de la privacidad de datos corporativos y la optimización de la persistencia de consultas.
+
+### Añadido
+- **Privacidad Multinivel (Isolation)**: Los historiales de chat ahora están vinculados estrictamente al usuario, impidiendo el acceso a conversaciones ajenas incluso con manipulación de IDs.
+- **Persistencia Pre-Flight**: El sistema ahora guarda las preguntas del usuario inmediatamente antes de contactar a la IA. Esto previene la pérdida de consultas si hay fallos de red o de cuota (Error 402).
+- **Monitor de Inversión Estética**: Rediseño del panel "Uso de Sesión" para una integración visual equilibrada con los permisos administrativos.
+
+### Corregido
+- **Fuga de Sesiones**: El cierre de sesión ahora limpia proactivamente los metadatos de conversación antigua del almacenamiento local.
+- **Resiliencia 404/500**: La gestión de historial (borrado y carga) ahora es tolerante a fallos de sincronización entre el cliente y el servidor.
+- **Interrupción de Entrada**: Corregido bug que congelaba el cuadro de texto del chat al procesar métricas de costo.
+
 ## [1.4.5] - 2026-02-27
 ### v1.4.5 Financial Monitoring & Token Audit
 Décima actualización enfocada en la transparencia de costos y auditoría de recursos de IA.
