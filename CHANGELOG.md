@@ -2,6 +2,17 @@
 
 Todas las modificaciones notables de este proyecto se documentarán en este archivo.
 
+## [1.4.4] - 2026-02-27
+### v1.4.4 Diagnostic & Quota Awareness
+Novena actualización enfocada en la detección proactiva de errores de proveedor y herramientas de diagnóstico.
+
+### Añadido
+- **Detección de Cuota OpenAI**: El backend ahora identifica específicamente errores de "insufficient_quota" y notifica al usuario de forma amigable.
+- **Script de Diagnóstico**: Inclusión de `test_openai_conn.py` para verificar la conexión con OpenAI y la validez de la API Key fuera del flujo de la app.
+
+### Corregido
+- **Estabilidad del Chat**: Ajuste en el ciclo de vida del mensaje para asegurar que el estado de "Cargando" se limpie correctamente incluso en fallos críticos.
+
 ## [1.4.3] - 2026-02-27
 ### v1.4.3 Visual Intelligence
 Octava actualización enfocada en la visualización automática de procesos técnicos y flujos de trabajo.

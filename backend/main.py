@@ -367,10 +367,17 @@ async def chat(request: QueryRequest, db: Session = Depends(get_db), current_use
                 
         return QueryResponse(answer=answer, sources=source_details)
     except Exception as e:
-        print(f"[ERROR CHAT] Ocurrió un fallo: {str(e)}")
+        error_msg = str(e)
+        print(f"[ERROR CHAT] Ocurrió un fallo crítico: {error_msg}")
+        
+        # Detección específica de cuotas de OpenAI
+        if "insufficient_quota" in error_msg.lower() or "429" in error_msg:
+            friendly_msg = "⚠️ Se ha agotado el saldo o la cuota de la API de OpenAI. Por favor, revisa tu cuenta de facturación."
+            raise HTTPException(status_code=402, detail=friendly_msg)
+            
         import traceback
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Error interno en el chat: {error_msg}")
 
 @app.get("/areas")
 async def list_areas(db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):

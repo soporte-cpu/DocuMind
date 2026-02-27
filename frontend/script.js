@@ -703,10 +703,16 @@ async function sendMessage() {
             })
         });
         const data = await res.json();
+        const answer = data.answer || "La IA no ha devuelto una respuesta válida.";
+        appendMessage('assistant', answer, false, data.sources);
         loading.remove();
-        appendMessage('assistant', data.answer, false, data.sources);
         loadHistory();
-    } catch (e) { loading.textContent = "Error."; }
+    } catch (e) {
+        console.error("Chat Error:", e);
+        if (loading && loading.parentNode) {
+            loading.innerHTML = `<span style="color:#ef4444;">⚠️ Error al procesar respuesta.</span>`;
+        }
+    }
 }
 
 function appendMessage(role, content, isLoading = false, sources = []) {
@@ -730,10 +736,19 @@ function appendMessage(role, content, isLoading = false, sources = []) {
         sourcesHtml += `</div>`;
     }
 
-    // Configurar Marked para renderizar Markdown
-    const renderedContent = (role === 'assistant' && !isLoading)
-        ? marked.parse(content)
-        : content.replace(/\n/g, '<br>');
+    // Configurar Marked para renderizar Markdown (con fallback de seguridad)
+    let renderedContent = content.replace(/\n/g, '<br>');
+    if (role === 'assistant' && !isLoading) {
+        try {
+            if (typeof marked !== 'undefined' && marked.parse) {
+                renderedContent = marked.parse(content);
+            } else if (typeof marked === 'function') {
+                renderedContent = marked(content);
+            }
+        } catch (e) {
+            console.warn("Markdown parse failed, using text fallback");
+        }
+    }
 
     msgDiv.innerHTML = `
         <div class="bubble-avatar">${role === 'assistant' ? 'DM' : 'YO'}</div>
