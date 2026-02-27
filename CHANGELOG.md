@@ -2,6 +2,15 @@
 
 Todas las modificaciones notables de este proyecto se documentarán en este archivo.
 
+## [1.4.3] - 2026-02-27
+### v1.4.3 Visual Intelligence
+Octava actualización enfocada en la visualización automática de procesos técnicos y flujos de trabajo.
+
+### Añadido
+- **Motor de Renderizado Visual**: Integración de `marked.js` y `mermaid.js` para transformar texto técnico en diagramas profesionales.
+- **Inteligencia de Flujo Automática**: La IA ahora detecta palabras clave como "pasos", "flujo" o "diagrama" para generar dibujos técnicos automáticamente.
+- **Formateo Markdown Avanzado**: Soporte completo para tablas, listas y bloques de código con estilo impecable en las burbujas de chat.
+
 ## [1.4.2] - 2026-02-27
 ### v1.4.2 UI Resilience & Feedback
 Séptima actualización enfocada en el feedback de usuario en puntos críticos y estabilidad de descarga.
