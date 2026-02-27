@@ -634,13 +634,16 @@ async function deleteHistoryItem(sid) {
     if (!confirm("¿Eliminar esta conversación?")) return;
     try {
         const res = await authFetch(`${API_BASE}/history/${sid}`, { method: 'DELETE' });
-        if (res.ok) {
+        if (res.ok || res.status === 404) {
             if (currentSessionId === sid) {
                 currentSessionId = `session_${Date.now()}`;
                 localStorage.setItem('documind_session', currentSessionId);
                 chatBox.innerHTML = '<div class="message-bubble assistant"><div class="bubble-avatar">DM</div><div class="bubble-content">Sesión eliminada. ¿En qué puedo ayudarte?</div></div>';
             }
             await loadHistory();
+        } else {
+            console.error("Error del servidor al borrar chat:", res.status);
+            alert("No se pudo eliminar el chat. Intente de nuevo.");
         }
     } catch (e) {
         console.error("Error al borrar chat:", e);
@@ -724,6 +727,7 @@ function appendMessage(role, content, isLoading = false, sources = [], usage = n
     msgDiv.className = `message-bubble ${role}`;
 
     let usageHtml = '';
+    let sourcesHtml = '';
     if (usage) {
         // Precios GPT-4o: $2.50/M in, $10.00/M out
         const cost = (usage.prompt_tokens * 0.0000025) + (usage.completion_tokens * 0.00001);
