@@ -669,14 +669,21 @@ document.getElementById('new-chat-btn').onclick = () => {
 
 async function loadChat(sid) {
     if (!sid) return;
+    // Si el ID de sesión es muy nuevo (vía timestamp), no intentamos cargarlo del servidor
+    // para evitar el 404 innecesario, ya sabemos que está vacío.
+    const timeInSid = parseInt(sid.split('_')[1]);
+    if (timeInSid && (Date.now() - timeInSid < 5000)) {
+        chatBox.innerHTML = '<div class="message-bubble assistant"><div class="bubble-avatar">DM</div><div class="bubble-content">¡Hola! Soy DocuMind. ¿En qué puedo ayudarte hoy?</div></div>';
+        return;
+    }
+
     try {
         const res = await authFetch(`${API_BASE}/history/${sid}`);
-        if (res.status === 404) {
-            // Es un chat nuevo sin mensajes aún, no hacemos nada o mostramos bienvenida
+        if (!res.ok) {
+            // Si el servidor devuelve error (ej: 404), tratamos como chat nuevo
             chatBox.innerHTML = '<div class="message-bubble assistant"><div class="bubble-avatar">DM</div><div class="bubble-content">¡Hola! Soy DocuMind. ¿En qué puedo ayudarte hoy?</div></div>';
             return;
         }
-        if (!res.ok) return;
         const messages = await res.json();
         chatBox.innerHTML = '';
         if (messages.length === 0) {
@@ -684,7 +691,10 @@ async function loadChat(sid) {
         } else {
             messages.forEach(msg => appendMessage(msg.role, msg.content));
         }
-    } catch (e) { console.error("LoadChat fail:", e); }
+    } catch (e) {
+        console.error("LoadChat fail:", e);
+        chatBox.innerHTML = '<div class="message-bubble assistant"><div class="bubble-avatar">DM</div><div class="bubble-content">¡Hola! Soy DocuMind. ¿En qué puedo ayudarte hoy?</div></div>';
+    }
 }
 
 let currentSourceMetadata = {};

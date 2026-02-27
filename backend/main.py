@@ -558,7 +558,7 @@ async def get_chat_messages(session_id: str, db: Session = Depends(get_db), curr
         
     chat_db = query.first()
     if not chat_db:
-        raise HTTPException(status_code=404, detail="Conversación no encontrada")
+        return [] # Devolver lista vacía en lugar de 404 para chats nuevos (evita ruido en consola)
     messages = db.query(models.Message).filter(models.Message.chat_id == chat_db.id).order_by(models.Message.created_at.asc()).all()
     return [{"role": m.role, "content": m.content} for m in messages]
 
