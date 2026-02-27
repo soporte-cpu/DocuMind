@@ -303,6 +303,7 @@ function switchView(viewName) {
 
     if (viewName === 'knowledge') loadAreas();
     if (viewName === 'users') loadUsers();
+    if (viewName === 'analytics') loadAnalytics();
 }
 
 async function loadAreas() {
@@ -950,3 +951,76 @@ window.onclick = (e) => {
         if (e.target.id === 'user-modal') closeUserModal();
     }
 };
+
+
+/* ANALYTICS ENGINE */
+let usageChart = null;
+
+async function loadAnalytics() {
+    try {
+        const res = await authFetch(`${API_BASE}/analytics/stats`);
+        if (!res.ok) return;
+        const data = await res.json();
+
+        // 1. Update Cards
+        document.getElementById('ana-total-cost').innerText = `$${data.summary.total_cost.toFixed(2)}`;
+        document.getElementById('ana-total-tokens').innerText = `${(data.summary.total_tokens / 1000000).toFixed(2)}M`;
+        document.getElementById('ana-total-requests').innerText = data.summary.total_requests;
+
+        // Budget calculation (example $10 cap)
+        const budgetPercent = Math.min((data.summary.total_cost / 10) * 100, 100);
+        document.getElementById('ana-cost-fill').style.width = `${budgetPercent}%`;
+
+        // 2. User Ranking
+        const userList = document.getElementById('ana-user-list');
+        userList.innerHTML = '';
+        data.users.sort((a, b) => b.tokens - a.tokens).forEach(u => {
+            const item = document.createElement('div');
+            item.className = 'user-usage-item';
+            item.innerHTML = `
+                <div class="user-usage-info">
+                    <div class="user-usage-avatar">${u.username.charAt(0).toUpperCase()}</div>
+                    <div style="font-weight:600;">${u.username}</div>
+                </div>
+                <div class="text-secondary" style="font-size:0.9rem;">${(u.tokens / 1000).toFixed(1)}k tokens</div>
+            `;
+            userList.appendChild(item);
+        });
+
+        // 3. Render Chart
+        renderUsageChart(data.daily);
+
+    } catch (e) {
+        console.error("Analytics fail:", e);
+    }
+}
+
+function renderUsageChart(dailyData) {
+    const ctx = document.getElementById('usageChart').getContext('2d');
+
+    if (usageChart) usageChart.destroy();
+
+    usageChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: dailyData.map(d => d.date),
+            datasets: [{
+                label: 'Tokens',
+                data: dailyData.map(d => d.tokens),
+                backgroundColor: '#8b5cf6',
+                borderRadius: 4,
+                barThickness: 30
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+}
+

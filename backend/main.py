@@ -581,6 +581,51 @@ async def delete_chat_session(session_id: str, db: Session = Depends(get_db), cu
     db.commit()
     return {"status": "deleted"}
 
+@app.get("/analytics/stats")
+async def get_analytics_stats(db: Session = Depends(get_db), admin: models.User = Depends(auth.check_admin_role)):
+    """Obtiene estadísticas globales de uso para el panel de administración."""
+    from sqlalchemy import func
+    
+    try:
+        # 1. Totales generales
+        total_prompt = db.query(func.sum(models.Message.prompt_tokens)).scalar() or 0
+        total_completion = db.query(func.sum(models.Message.completion_tokens)).scalar() or 0
+        total_tokens = total_prompt + total_completion
+        total_requests = db.query(func.count(models.Message.id)).filter(models.Message.role == "assistant").scalar() or 0
+        
+        # Costo estimado (precios gpt-4o: $2.5/M prompt, $10/M completion)
+        total_cost = (total_prompt * 0.0000025) + (total_completion * 0.00001)
+        
+        # 2. Uso por día (últimos 14 días para el gráfico)
+        daily_usage = db.query(
+            func.date(models.Message.created_at).label('date'),
+            func.sum(models.Message.prompt_tokens + models.Message.completion_tokens).label('tokens'),
+            func.count(models.Message.id).label('requests')
+        ).filter(models.Message.role == "assistant").group_by(func.date(models.Message.created_at))\
+         .order_by(func.date(models.Message.created_at).desc()).limit(14).all()
+        
+        # 3. Uso por usuario
+        user_usage = db.query(
+            models.User.username,
+            func.sum(models.Message.prompt_tokens + models.Message.completion_tokens).label('tokens')
+        ).join(models.ChatTurn, models.User.id == models.ChatTurn.user_id)\
+         .join(models.Message, models.ChatTurn.id == models.Message.chat_id)\
+         .filter(models.Message.role == "assistant")\
+         .group_by(models.User.username).all()
+         
+        return {
+            "summary": {
+                "total_tokens": total_tokens,
+                "total_requests": total_requests,
+                "total_cost": round(total_cost, 4)
+            },
+            "daily": [{"date": d.date, "tokens": d.tokens, "requests": d.requests} for d in reversed(daily_usage)],
+            "users": [{"username": u.username, "tokens": u.tokens} for u in user_usage]
+        }
+    except Exception as e:
+        print(f"[ERROR ANALYTICS] {e}")
+        raise HTTPException(status_code=500, detail="Error al generar métricas")
+
 @app.get("/document/text/{area}/{filename:path}")
 async def get_document_text(area: str, filename: str, current_user: models.User = Depends(auth.get_current_user)):
     """Extrae y devuelve el texto completo de un documento para previsualización."""

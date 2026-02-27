@@ -13,6 +13,7 @@
     <!-- Markdown & Diagrams Support -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         mermaid.initialize({ startOnLoad: false, theme: 'neutral' });
     </script>
@@ -43,8 +44,8 @@
 
     <nav class="nav-rail">
         <div class="nav-item active" id="nav-chat" onclick="switchView('chat')" title="Chat">💬</div>
-        <div class="nav-item admin-only" id="nav-knowledge" onclick="switchView('knowledge')" title="Gestión">📁
-        </div>
+        <div class="nav-item admin-only" id="nav-knowledge" onclick="switchView('knowledge')" title="Gestión">📁</div>
+        <div class="nav-item admin-only" id="nav-analytics" onclick="switchView('analytics')" title="Métricas">📊</div>
         <div class="nav-item admin-only" id="nav-users" onclick="switchView('users')" title="Usuarios">👥</div>
         <div style="margin-top: auto;" class="nav-item" onclick="logout()" title="Cerrar Sesión">🚪</div>
     </nav>
@@ -349,6 +350,7 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="script.js"></script>
 </body>
 
