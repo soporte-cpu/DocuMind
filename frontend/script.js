@@ -722,7 +722,6 @@ function appendMessage(role, content, isLoading = false, sources = []) {
             const sContent = s.content || "";
             const displayName = sName.split(/[\\/]/).pop();
 
-            // Guardar en store para evitar problemas de escape en HTML
             const storeIdx = sourceStore.length;
             sourceStore.push({ name: sName, area: sArea, snippet: sContent, query: lastUserQuery });
 
@@ -731,15 +730,35 @@ function appendMessage(role, content, isLoading = false, sources = []) {
         sourcesHtml += `</div>`;
     }
 
+    // Configurar Marked para renderizar Markdown
+    const renderedContent = (role === 'assistant' && !isLoading)
+        ? marked.parse(content)
+        : content.replace(/\n/g, '<br>');
+
     msgDiv.innerHTML = `
         <div class="bubble-avatar">${role === 'assistant' ? 'DM' : 'YO'}</div>
         <div class="bubble-content">
-            ${content.replace(/\n/g, '<br>')}
+            <div class="markdown-body">${renderedContent}</div>
             ${sourcesHtml}
         </div>
     `;
+
     chatBox.appendChild(msgDiv);
     chatBox.scrollTop = chatBox.scrollHeight;
+
+    // Renderizado de Mermaid si existen bloques de código mermaid
+    if (role === 'assistant' && !isLoading && content.includes('```mermaid')) {
+        setTimeout(async () => {
+            try {
+                await mermaid.run({
+                    nodes: msgDiv.querySelectorAll('.language-mermaid')
+                });
+            } catch (e) {
+                console.error("Mermaid check fail:", e);
+            }
+        }, 100);
+    }
+
     return msgDiv;
 }
 

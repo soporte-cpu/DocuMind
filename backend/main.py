@@ -270,10 +270,16 @@ async def chat(request: QueryRequest, db: Session = Depends(get_db), current_use
         Tu objetivo es proporcionar datos técnicos 100% veraces basados en el CONTEXTO y el HISTORIAL.
 
         REGLAS DE ORO:
-        1. PRIORIDAD DE MEMORIA: Si la información ya fue explicada en el HISTORIAL de forma clara, úsala para mantener la coherencia.
+        1. PRIORIDAD DE MEMORIA: Si la información ya fue explicada en el HISTORIAL de forma clara, úsalo para mantener la coherencia.
         2. EXTRACCIÓN LITERAL: Si el CONTEXTO tiene datos específicos (nombres de software, marcas, parámetros), cítalos textualmente.
         3. HONESTIDAD TÉCNICA: Si tras revisar HISTORIAL y CONTEXTO no encuentras el dato, di: "No he encontrado información específica sobre ese detalle en los documentos actuales."
         4. SIN CONTRADICCIONES: No digas que no sabes algo si ya lo respondiste correctamente hace un momento.
+        5. VISUALIZACIÓN AUTOMÁTICA (CRÍTICO): Si el usuario pide un "diagrama", "flujo", "organigrama", "mapa", "pasos", "proceso" o similar, DEBES incluir siempre un bloque de código mermaid al final de tu respuesta para ilustrarlo visualmente. Usa el formato:
+           ```mermaid
+           graph TD
+           ... lógica del diagrama ...
+           ```
+           NO menciones la palabra 'Mermaid' al usuario, solo di: "Aquí tienes el diagrama del proceso:".
 
         Área Actual: {area_name}
 
