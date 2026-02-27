@@ -683,6 +683,7 @@ async function loadChat(sid) {
 let currentSourceMetadata = {};
 let lastUserQuery = '';
 let sourceStore = [];
+let sessionUsage = { tokens: 0, cost: 0 };
 
 async function sendMessage() {
     const text = userInput.value.trim();
@@ -704,7 +705,7 @@ async function sendMessage() {
         });
         const data = await res.json();
         const answer = data.answer || "La IA no ha devuelto una respuesta válida.";
-        appendMessage('assistant', answer, false, data.sources);
+        appendMessage('assistant', answer, false, data.sources, data.usage);
         loading.remove();
         loadHistory();
     } catch (e) {
@@ -715,11 +716,25 @@ async function sendMessage() {
     }
 }
 
-function appendMessage(role, content, isLoading = false, sources = []) {
+function appendMessage(role, content, isLoading = false, sources = [], usage = null) {
     const msgDiv = document.createElement('div');
     msgDiv.className = `message-bubble ${role}`;
 
-    let sourcesHtml = '';
+    let usageHtml = '';
+    if (usage) {
+        // Precios GPT-4o: $2.50/M in, $10.00/M out
+        const cost = (usage.prompt_tokens * 0.0000025) + (usage.completion_tokens * 0.00001);
+        sessionUsage.tokens += usage.total_tokens;
+        sessionUsage.cost += cost;
+
+        usageHtml = `
+            <div class="usage-badge" title="Costo estimado de esta respuesta">
+                <span>⚡ ${usage.total_tokens} tokens</span>
+                <span style="margin-left:8px; opacity:0.7;">$${cost.toFixed(4)}</span>
+            </div>
+        `;
+        updateSessionStats();
+    }
     if (sources && sources.length > 0) {
         sourcesHtml = `<div class="source-container" style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">`;
         sources.forEach((s) => {
@@ -755,6 +770,7 @@ function appendMessage(role, content, isLoading = false, sources = []) {
         <div class="bubble-content">
             <div class="markdown-body">${renderedContent}</div>
             ${sourcesHtml}
+            ${usageHtml}
         </div>
     `;
 
@@ -775,6 +791,13 @@ function appendMessage(role, content, isLoading = false, sources = []) {
     }
 
     return msgDiv;
+}
+
+function updateSessionStats() {
+    const tkn = document.getElementById('session-tokens');
+    const cst = document.getElementById('session-cost');
+    if (tkn) tkn.innerText = `⚡ ${sessionUsage.tokens} tkn`;
+    if (cst) cst.innerText = `$${sessionUsage.cost.toFixed(3)}`;
 }
 
 function showSourceStoreDetail(idx) {

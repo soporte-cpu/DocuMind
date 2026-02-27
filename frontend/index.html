@@ -62,124 +62,130 @@
 
                 <div class="history-container" id="history-container"></div>
 
-                <div class="sidebar-bottom">
-                    <div class="area-config-box">
-                        <span class="label-tiny">CONTEXTO DE BÚSQUEDA</span>
-                        <select class="professional-select" id="chat-area-selector">
-                            <option value="">🏢 Todas las Áreas</option>
-                        </select>
+                <div class="area-config-box">
+                    <span class="label-tiny">CONTEXTO DE BÚSQUEDA</span>
+                    <select class="professional-select" id="chat-area-selector">
+                        <option value="">🏢 Todas las Áreas</option>
+                    </select>
+                </div>
+                <div class="session-usage-box admin-only">
+                    <span class="label-tiny">USO DE SESIÓN</span>
+                    <div class="usage-stats">
+                        <span id="session-tokens" title="Tokens totales usados en esta sesión">⚡ 0 tkn</span>
+                        <span id="session-cost" title="Inversión estimada de sesión">$0.000</span>
                     </div>
                 </div>
-            </aside>
-
-            <main class="chat-main">
-                <header class="chat-header">
-                    <button class="mobile-menu-toggle" id="mobile-menu-btn" title="Menú">☰</button>
-                    <div class="header-info">
-                        <h2>Asistente Inteligente</h2>
-                        <div class="badge-status">● En línea</div>
-                    </div>
-                </header>
-                <div class="chat-viewport" id="chat-box"></div>
-                <div class="chat-input-area">
-                    <div class="input-wrapper">
-                        <textarea id="user-input" rows="1" placeholder="Haz una consulta profesional..."></textarea>
-                        <button class="send-btn" id="send-btn">↗</button>
-                    </div>
-                </div>
-            </main>
         </div>
+        </aside>
 
-        <!-- KNOWLEDGE VIEW -->
-        <div id="view-knowledge" class="view">
-            <aside class="k-sidebar">
-                <div class="k-sidebar-header">
-                    <h3>Espacios</h3>
-                    <button class="btn-icon" onclick="openCreateAreaModal()">+</button>
+        <main class="chat-main">
+            <header class="chat-header">
+                <button class="mobile-menu-toggle" id="mobile-menu-btn" title="Menú">☰</button>
+                <div class="header-info">
+                    <h2>Asistente Inteligente</h2>
+                    <div class="badge-status">● En línea</div>
                 </div>
-                <div class="area-list" id="k-area-list"></div>
-            </aside>
-            <main class="k-main">
-                <header class="k-header">
-                    <div class="k-area-info">
-                        <span id="current-area-icon" class="big-icon">📁</span>
-                        <div>
-                            <h2 id="current-area-name">Área</h2>
-                            <p class="text-muted">Gestión de documentos técnicos</p>
-                        </div>
-                    </div>
-                    <div class="k-header-actions">
-                        <div class="search-input-wrapper">
-                            <span>🔍</span>
-                            <input type="text" id="file-search" placeholder="Filtrar archivos...">
-                        </div>
-                        <button class="btn-primary" onclick="document.getElementById('file-upload').click()">Subir
-                            Archivos</button>
-                        <button class="btn-ghost admin-only" style="border:1px solid #fee2e2; color:#ef4444;"
-                            onclick="reprocessDocuments()">🔄 Reprocesar Todo</button>
-                        <button class="btn-ghost" style="border:1px solid var(--border); border-radius:8px;"
-                            onclick="document.getElementById('folder-upload').click()">📁 Cargar Carpeta</button>
-                    </div>
-                    <input type="file" id="file-upload" multiple hidden onchange="uploadToCurrentArea(this.files)">
-                    <input type="file" id="folder-upload" webkitdirectory directory multiple hidden
-                        onchange="uploadToCurrentArea(this.files)">
-                </header>
-
-                <!-- Panel de Inteligencia de Área (Nuevo) -->
-                <div id="area-intelligence-container"
-                    style="display:none; padding: 20px 40px 0 40px; animation: fadeIn 0.5s ease;">
-                    <div class="intel-card">
-                        <div class="intel-header">
-                            <span class="intel-badge">✨ INTELIGENCIA DE ÁREA</span>
-                            <div class="intel-controls">
-                                <button class="btn-icon-sm"
-                                    onclick="this.closest('#area-intelligence-container').style.display='none'">×</button>
-                            </div>
-                        </div>
-                        <div class="intel-body">
-                            <div class="intel-summary">
-                                <p id="area-summary-text">Generando resumen estratégico...</p>
-                            </div>
-                            <div class="intel-tags" id="area-topics-list"></div>
-                        </div>
-                        <div class="intel-footer">
-                            <span class="label-tiny">PREGUNTAS SUGERIDAS:</span>
-                            <div class="intel-questions" id="area-questions-list"></div>
-                        </div>
-                    </div>
+            </header>
+            <div class="chat-viewport" id="chat-box"></div>
+            <div class="chat-input-area">
+                <div class="input-wrapper">
+                    <textarea id="user-input" rows="1" placeholder="Haz una consulta profesional..."></textarea>
+                    <button class="send-btn" id="send-btn">↗</button>
                 </div>
+            </div>
+        </main>
+    </div>
 
-                <div class="k-grid" id="k-file-grid"></div>
-            </main>
-        </div>
-
-        <!-- USERS VIEW -->
-        <div id="view-users" class="view">
-            <main class="k-main" style="padding: 40px;">
-                <header class="k-header" style="padding-left:0; padding-right:0;">
+    <!-- KNOWLEDGE VIEW -->
+    <div id="view-knowledge" class="view">
+        <aside class="k-sidebar">
+            <div class="k-sidebar-header">
+                <h3>Espacios</h3>
+                <button class="btn-icon" onclick="openCreateAreaModal()">+</button>
+            </div>
+            <div class="area-list" id="k-area-list"></div>
+        </aside>
+        <main class="k-main">
+            <header class="k-header">
+                <div class="k-area-info">
+                    <span id="current-area-icon" class="big-icon">📁</span>
                     <div>
-                        <h2>Gestión de Usuarios</h2>
-                        <p class="text-muted">Control de acceso y perfiles corporativos</p>
+                        <h2 id="current-area-name">Área</h2>
+                        <p class="text-muted">Gestión de documentos técnicos</p>
                     </div>
-                    <button class="btn-primary" onclick="openCreateUserModal()">+ Nuevo Usuario</button>
-                </header>
-                <div class="users-table-container">
-                    <table class="pro-table">
-                        <thead>
-                            <tr>
-                                <th>Nombre Completo</th>
-                                <th>Usuario</th>
-                                <th>Email</th>
-                                <th>Rol</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="users-table-body"></tbody>
-                    </table>
                 </div>
-            </main>
-        </div>
+                <div class="k-header-actions">
+                    <div class="search-input-wrapper">
+                        <span>🔍</span>
+                        <input type="text" id="file-search" placeholder="Filtrar archivos...">
+                    </div>
+                    <button class="btn-primary" onclick="document.getElementById('file-upload').click()">Subir
+                        Archivos</button>
+                    <button class="btn-ghost admin-only" style="border:1px solid #fee2e2; color:#ef4444;"
+                        onclick="reprocessDocuments()">🔄 Reprocesar Todo</button>
+                    <button class="btn-ghost" style="border:1px solid var(--border); border-radius:8px;"
+                        onclick="document.getElementById('folder-upload').click()">📁 Cargar Carpeta</button>
+                </div>
+                <input type="file" id="file-upload" multiple hidden onchange="uploadToCurrentArea(this.files)">
+                <input type="file" id="folder-upload" webkitdirectory directory multiple hidden
+                    onchange="uploadToCurrentArea(this.files)">
+            </header>
+
+            <!-- Panel de Inteligencia de Área (Nuevo) -->
+            <div id="area-intelligence-container"
+                style="display:none; padding: 20px 40px 0 40px; animation: fadeIn 0.5s ease;">
+                <div class="intel-card">
+                    <div class="intel-header">
+                        <span class="intel-badge">✨ INTELIGENCIA DE ÁREA</span>
+                        <div class="intel-controls">
+                            <button class="btn-icon-sm"
+                                onclick="this.closest('#area-intelligence-container').style.display='none'">×</button>
+                        </div>
+                    </div>
+                    <div class="intel-body">
+                        <div class="intel-summary">
+                            <p id="area-summary-text">Generando resumen estratégico...</p>
+                        </div>
+                        <div class="intel-tags" id="area-topics-list"></div>
+                    </div>
+                    <div class="intel-footer">
+                        <span class="label-tiny">PREGUNTAS SUGERIDAS:</span>
+                        <div class="intel-questions" id="area-questions-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="k-grid" id="k-file-grid"></div>
+        </main>
+    </div>
+
+    <!-- USERS VIEW -->
+    <div id="view-users" class="view">
+        <main class="k-main" style="padding: 40px;">
+            <header class="k-header" style="padding-left:0; padding-right:0;">
+                <div>
+                    <h2>Gestión de Usuarios</h2>
+                    <p class="text-muted">Control de acceso y perfiles corporativos</p>
+                </div>
+                <button class="btn-primary" onclick="openCreateUserModal()">+ Nuevo Usuario</button>
+            </header>
+            <div class="users-table-container">
+                <table class="pro-table">
+                    <thead>
+                        <tr>
+                            <th>Nombre Completo</th>
+                            <th>Usuario</th>
+                            <th>Email</th>
+                            <th>Rol</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table-body"></tbody>
+                </table>
+            </div>
+        </main>
+    </div>
     </div>
 
     <!-- Modal User (Crear/Editar) -->

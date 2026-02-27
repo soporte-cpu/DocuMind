@@ -2,6 +2,16 @@
 
 Todas las modificaciones notables de este proyecto se documentarán en este archivo.
 
+## [1.4.5] - 2026-02-27
+### v1.4.5 Financial Monitoring & Token Audit
+Décima actualización enfocada en la transparencia de costos y auditoría de recursos de IA.
+
+### Añadido
+- **Monitor de Tokens en Tiempo Real**: Visualización del peso exacto (tokens de entrada/salida) en cada respuesta de la IA.
+- **Estimación de Costos "Live"**: Cálculo automático del costo en dólares basado en tarifas de GPT-4o para cada interacción.
+- **Consola de Sesión**: Panel lateral (solo admin) que acumula el uso total y la inversión de la sesión actual.
+- **Trazabilidad en DB**: Registro histórico de tokens en la base de datos para auditorías futuras de consumo.
+
 ## [1.4.4] - 2026-02-27
 ### v1.4.4 Diagnostic & Quota Awareness
 Novena actualización enfocada en la detección proactiva de errores de proveedor y herramientas de diagnóstico.

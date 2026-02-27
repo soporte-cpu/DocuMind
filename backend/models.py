@@ -59,6 +59,8 @@ class Message(Base):
     chat_id = Column(Integer, ForeignKey("chats.id"))
     role = Column(String) # user o assistant
     content = Column(Text)
+    prompt_tokens = Column(Integer, default=0)
+    completion_tokens = Column(Integer, default=0)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     
     chat = relationship("ChatTurn", back_populates="messages")

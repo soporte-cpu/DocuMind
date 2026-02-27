@@ -69,9 +69,15 @@ class SourceDetail(BaseModel):
     content: str
     area: str
 
+class UsageDetail(BaseModel):
+    prompt_tokens: int
+    completion_tokens: int
+    total_tokens: int
+
 class QueryResponse(BaseModel):
     answer: str
     sources: List[SourceDetail]
+    usage: Optional[UsageDetail] = None
 
 class Token(BaseModel):
     access_token: str
@@ -296,17 +302,36 @@ async def chat(request: QueryRequest, db: Session = Depends(get_db), current_use
         prompt = ChatPromptTemplate.from_template(template)
         history_str = "\n".join([f"{'Usuario' if isinstance(m, HumanMessage) else 'IA'}: {m.content}" for m in history[-6:]])
         
-        chain = prompt | llm | StrOutputParser()
-        answer = chain.invoke({
+        # Obtener respuesta con metadata de uso (LangChain OpenAI invoke)
+        response = (prompt | llm).invoke({
             "area_name": request.area or "General",
             "context": context_text, 
             "history": history_str,
             "question": request.prompt
         })
         
-        # 5. Guardar en Base de Datos
+        answer = response.content
+        usage_info = None
+        
+        # Extraer tokens del metadata de LangChain
+        meta = response.response_metadata
+        if 'token_usage' in meta:
+            tk = meta['token_usage']
+            usage_info = UsageDetail(
+                prompt_tokens=tk.get('prompt_tokens', 0),
+                completion_tokens=tk.get('completion_tokens', 0),
+                total_tokens=tk.get('total_tokens', 0)
+            )
+
+        # 5. Guardar en Base de Datos (Con Tokens)
         user_msg = models.Message(chat_id=chat_db.id, role="user", content=request.prompt)
-        assistant_msg = models.Message(chat_id=chat_db.id, role="assistant", content=answer)
+        assistant_msg = models.Message(
+            chat_id=chat_db.id, 
+            role="assistant", 
+            content=answer,
+            prompt_tokens=usage_info.prompt_tokens if usage_info else 0,
+            completion_tokens=usage_info.completion_tokens if usage_info else 0
+        )
         db.add(user_msg)
         db.add(assistant_msg)
         db.commit()
@@ -365,7 +390,7 @@ async def chat(request: QueryRequest, db: Session = Depends(get_db), current_use
         for name, data in unique_sources.items():
             source_details.append(SourceDetail(name=name, content=data["content"], area=data["area"]))
                 
-        return QueryResponse(answer=answer, sources=source_details)
+        return QueryResponse(answer=answer, sources=source_details, usage=usage_info)
     except Exception as e:
         error_msg = str(e)
         print(f"[ERROR CHAT] Ocurrió un fallo crítico: {error_msg}")

@@ -1778,3 +1778,40 @@ body:not(.is-admin) .is-admin-only {
     background: white !important;
     color: initial !important;
 }
+/* =========================================
+   USAGE & BILLING STYLES
+   ========================================= */
+.usage-badge {
+    margin-top: 12px;
+    padding: 6px 12px;
+    background: #f1f5f9;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+    display: inline-flex;
+    align-items: center;
+    font-weight: 500;
+}
+
+.usage-badge span {
+    display: inline-flex;
+    align-items: center;
+}
+.session-usage-box {
+    margin-top: 12px;
+    padding: 12px;
+    background: rgba(15, 23, 42, 0.05);
+    border-radius: 12px;
+    border: 1px dashed rgba(15, 23, 42, 0.1);
+}
+
+.usage-stats {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+    font-family: monospace;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--primary);
+}
