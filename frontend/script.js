@@ -21,6 +21,7 @@ async function authFetch(url, options = {}) {
 
 function logout() {
     localStorage.removeItem('documind_token');
+    localStorage.removeItem('documind_session');
     document.getElementById('view-login').style.display = 'flex';
     document.getElementById('view-login').style.opacity = '1';
 }
@@ -656,6 +657,8 @@ function switchChat(sid) {
 document.getElementById('new-chat-btn').onclick = () => {
     currentSessionId = `session_${Date.now()}`;
     localStorage.setItem('documind_session', currentSessionId);
+    sessionUsage = { tokens: 0, cost: 0 };
+    updateSessionStats();
     chatBox.innerHTML = '<div class="message-bubble assistant"><div class="bubble-avatar">DM</div><div class="bubble-content">Nueva sesión. ¿En qué puedo ayudarte?</div></div>';
     loadHistory();
 };

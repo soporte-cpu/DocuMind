@@ -208,8 +208,11 @@ async def chat(request: QueryRequest, db: Session = Depends(get_db), current_use
         if not retriever:
             raise HTTPException(status_code=400, detail="No hay documentos indexados. Por favor sube uno primero.")
         
-        # 1. Gestionar Historial Persistente (Base de Datos)
-        chat_db = db.query(models.ChatTurn).filter(models.ChatTurn.session_id == request.session_id).first()
+        # 1. Gestionar Historial Persistente (Base de Datos) - Filtrar por Usuario
+        chat_db = db.query(models.ChatTurn).filter(
+            models.ChatTurn.session_id == request.session_id,
+            models.ChatTurn.user_id == current_user.id
+        ).first()
         if not chat_db:
             # Generar un título profesional corto con el LLM para la primera pregunta
             llm_title = ChatOpenAI(model_name="gpt-4o", temperature=0)
@@ -540,18 +543,30 @@ async def get_all_history(db: Session = Depends(get_db), current_user: models.Us
     return [{"session_id": c.session_id, "title": c.title, "area": c.area.name if c.area else "General"} for c in chats]
 
 @app.get("/history/{session_id}")
-async def get_chat_messages(session_id: str, db: Session = Depends(get_db)):
-    """Obtiene los mensajes de una conversación específica."""
-    chat_db = db.query(models.ChatTurn).filter(models.ChatTurn.session_id == session_id).first()
+async def get_chat_messages(session_id: str, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    """Obtiene los mensajes de una conversación específica, validando pertenencia."""
+    query = db.query(models.ChatTurn).filter(models.ChatTurn.session_id == session_id)
+    
+    # Si no es admin, solo puede ver lo suyo
+    if current_user.role != "admin":
+        query = query.filter(models.ChatTurn.user_id == current_user.id)
+        
+    chat_db = query.first()
     if not chat_db:
         raise HTTPException(status_code=404, detail="Conversación no encontrada")
     messages = db.query(models.Message).filter(models.Message.chat_id == chat_db.id).order_by(models.Message.created_at.asc()).all()
     return [{"role": m.role, "content": m.content} for m in messages]
 
 @app.delete("/history/{session_id}")
-async def delete_chat_session(session_id: str, db: Session = Depends(get_db)):
-    """Elimina una sesión de chat y todos sus mensajes."""
-    chat_db = db.query(models.ChatTurn).filter(models.ChatTurn.session_id == session_id).first()
+async def delete_chat_session(session_id: str, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    """Elimina una sesión de chat y todos sus mensajes, validando propiedad."""
+    query = db.query(models.ChatTurn).filter(models.ChatTurn.session_id == session_id)
+    
+    # Si no es admin, solo puede borrar lo suyo
+    if current_user.role != "admin":
+        query = query.filter(models.ChatTurn.user_id == current_user.id)
+        
+    chat_db = query.first()
     if not chat_db:
         raise HTTPException(status_code=404, detail="Sesión no encontrada")
     
