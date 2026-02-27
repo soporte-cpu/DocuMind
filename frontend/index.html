@@ -189,6 +189,81 @@
                 </div>
             </main>
         </div>
+
+        <!-- ANALYTICS VIEW -->
+        <div id="view-analytics" class="view">
+            <header class="view-header" style="padding: 40px 40px 0 40px;">
+                <h1 style="font-family:'Outfit', sans-serif; font-size:2rem; margin-bottom:4px;">Panel de Uso y Consumo
+                </h1>
+                <p class="text-muted">Auditoría financiera y métricas de IA</p>
+            </header>
+
+            <main class="k-main" style="padding: 20px 40px 40px 40px; overflow-y: auto;">
+                <div class="analytics-grid">
+                    <!-- Cards Row -->
+                    <div class="stat-card">
+                        <span class="stat-label">Inversión Total</span>
+                        <span class="stat-value" id="ana-total-cost">$0.00</span>
+                        <div class="stat-progress">
+                            <div id="ana-cost-fill" class="progress-fill" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label">Tokens Procesados</span>
+                        <span class="stat-value" id="ana-total-tokens">0M</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label">Consultas Totales</span>
+                        <span class="stat-value" id="ana-total-requests">0</span>
+                    </div>
+
+                    <!-- Main Chart -->
+                    <div class="chart-container-full">
+                        <div class="chart-header-row">
+                            <h3 style="margin:0;">Consumo Diario de Tokens</h3>
+                            <div class="chart-legend">
+                                <span>● GPT-4o</span>
+                            </div>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="usageChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Lists Row -->
+                    <div class="analytics-card">
+                        <h3 style="margin-bottom:20px;">Ranking de Usuarios</h3>
+                        <div id="ana-user-list" class="usage-list">
+                            <!-- Items dinámicos -->
+                        </div>
+                    </div>
+
+                    <div class="analytics-card">
+                        <h3 style="margin-bottom:20px;">Consumo por Servicio</h3>
+                        <div class="service-item">
+                            <div
+                                style="display:flex; justify-content:space-between; font-size:0.9rem; font-weight:600;">
+                                <span>Chat Completions (RAG)</span>
+                                <span class="service-val">100%</span>
+                            </div>
+                            <div class="service-bar-container">
+                                <div class="service-bar" style="width: 100%;"></div>
+                            </div>
+                        </div>
+                        <div class="service-item">
+                            <div
+                                style="display:flex; justify-content:space-between; font-size:0.9rem; font-weight:600; opacity:0.5;">
+                                <span>Images (DALL-E)</span>
+                                <span class="service-val">0%</span>
+                            </div>
+                            <div class="service-bar-container">
+                                <div class="service-bar" style="width: 0%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
     </div>
 
     <!-- Modal User (Crear/Editar) -->
