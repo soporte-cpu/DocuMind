@@ -2,6 +2,18 @@
 
 Todas las modificaciones notables de este proyecto se documentarán en este archivo.
 
+## [1.5.1] - 2026-03-02
+### v1.5.1 Economic Engine & Speed Boost
+Dúodécima actualización centrada en la optimización de costes operativos y la aceleración de la respuesta del sistema.
+
+### Añadido
+- **Cerebro GPT-4o-mini**: Transición del modelo estándar al motor 'Mini' de OpenAI. Las respuestas ahora son ~2x más rápidas y el consumo de saldo se ha reducido en un 90%.
+- **Recalibración de Auditoría**: El panel de Analytics ahora calcula los costes financieros basándose en las tarifas de GPT-4o-mini ($0.15/M in, $0.60/M out).
+
+### Corregido
+- **Consola Silenciosa**: Eliminación definitiva de errores 404 al iniciar chats nuevos mediante comprobaciones pre-vuelo en el cliente.
+- **Sincronización de Analytics**: Corregido bug que impedía la visualización de gráficos si el contenedor HTML no estaba listo.
+
 ## [1.5.0] - 2026-02-27
 ### v1.5.0 Privacy Shield & Consumption Guard
 Undécima actualización centrada en el blindaje de la privacidad de datos corporativos y la optimización de la persistencia de consultas.

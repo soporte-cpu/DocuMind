@@ -740,8 +740,8 @@ function appendMessage(role, content, isLoading = false, sources = [], usage = n
     let usageHtml = '';
     let sourcesHtml = '';
     if (usage) {
-        // Precios GPT-4o: $2.50/M in, $10.00/M out
-        const cost = (usage.prompt_tokens * 0.0000025) + (usage.completion_tokens * 0.00001);
+        // Precios GPT-4o-mini: $0.15/M in, $0.60/M out
+        const cost = (usage.prompt_tokens * 0.00000015) + (usage.completion_tokens * 0.0000006);
         sessionUsage.tokens += usage.total_tokens;
         sessionUsage.cost += cost;
 

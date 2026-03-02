@@ -215,7 +215,7 @@ async def chat(request: QueryRequest, db: Session = Depends(get_db), current_use
         ).first()
         if not chat_db:
             # Generar un título profesional corto con el LLM para la primera pregunta
-            llm_title = ChatOpenAI(model_name="gpt-4o", temperature=0)
+            llm_title = ChatOpenAI(model_name="gpt-4o-mini", temperature=0)
             title_prompt = f"Genera un título muy corto (máximo 4 palabras) para esta consulta: {request.prompt}"
             try:
                 chat_title = llm_title.invoke([HumanMessage(content=title_prompt)]).content.replace('"', '')
@@ -250,7 +250,7 @@ async def chat(request: QueryRequest, db: Session = Depends(get_db), current_use
 
         print(f"[CHAT] Sesión: {request.session_id} | Área: {request.area or 'Todas'}")
         
-        llm = ChatOpenAI(model_name="gpt-4o", temperature=0)
+        llm = ChatOpenAI(model_name="gpt-4o-mini", temperature=0)
         
         # 2. CONTEXTUALIZACIÓN
         standalone_question = request.prompt
@@ -593,8 +593,8 @@ async def get_analytics_stats(db: Session = Depends(get_db), admin: models.User 
         total_tokens = total_prompt + total_completion
         total_requests = db.query(func.count(models.Message.id)).filter(models.Message.role == "assistant").scalar() or 0
         
-        # Costo estimado (precios gpt-4o: $2.5/M prompt, $10/M completion)
-        total_cost = (total_prompt * 0.0000025) + (total_completion * 0.00001)
+        # Costo estimado (precios gpt-4o-mini: $0.15/M prompt, $0.60/M completion)
+        total_cost = (total_prompt * 0.00000015) + (total_completion * 0.0000006)
         
         # 2. Uso por día (últimos 14 días para el gráfico)
         daily_usage = db.query(
