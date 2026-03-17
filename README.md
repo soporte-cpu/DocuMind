@@ -1,4 +1,4 @@
-# DocuMind Enterprise v1.5.1 🚀
+# DocuMind Enterprise v1.5.2 🚀
 
 DocuMind Enterprise es una plataforma de gestión documental inteligente potenciada por Inteligencia Artificial y arquitectura RAG (Retrieval-Augmented Generation). Permite organizar documentos por áreas, realizar búsquedas híbridas (semántica + técnica) y chatear con los documentos para obtener respuestas precisas y profesionales con citación verificable.
 

@@ -2,6 +2,18 @@
 
 Todas las modificaciones notables de este proyecto se documentarán en este archivo.
 
+## [1.5.2] - 2026-03-17
+### v1.5.2 Deployment Resilience & Auto-Migration
+Decimotercera actualización enfocada en la robustez del despliegue en entornos Docker y la integridad de la base de datos.
+
+### Añadido
+- **Auto-Reparación de DB**: Sistema de migración automática que detecta y crea columnas faltantes (`user_id`, `tokens`, `icon`) al arrancar el contenedor. Esto previene errores 500 tras actualizaciones de esquema.
+- **Dependencias Modernizadas**: Inclusión de `langchain-community` en `requirements.txt` para soportar las nuevas versiones modulares de LangChain.
+
+### Corregido
+- **Resiliencia de Despliegue**: Solucionado el error de construcción en Docker por falta de paquetes de la comunidad.
+- **Favicon Path**: Corrección de ruta en el servidor para evitar errores 500/502 al cargar la web en navegadores modernos.
+
 ## [1.5.1] - 2026-03-02
 ### v1.5.1 Economic Engine & Speed Boost
 Dúodécima actualización centrada en la optimización de costes operativos y la aceleración de la respuesta del sistema.
