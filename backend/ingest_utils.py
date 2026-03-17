@@ -119,9 +119,15 @@ def update_vector_store(force_reprocess: bool = False, progress_callback=None):
     """Escanea la carpeta docs y regenera el índice FAISS. Si force_reprocess es True, borra el índice anterior."""
     if progress_callback: progress_callback(5)
     if force_reprocess and EMBEDDINGS_DIR.exists():
-        print("[INFO] Forzando reprocesamiento: Borrando índices antiguos...")
+        print("[INFO] Forzando reprocesamiento: Limpiando contenido de índices...")
         import shutil
-        shutil.rmtree(EMBEDDINGS_DIR)
+        for item in EMBEDDINGS_DIR.iterdir():
+            try:
+                if item.is_file(): item.unlink()
+                elif item.is_dir(): shutil.rmtree(item)
+            except Exception as e:
+                print(f"[ERROR CLEAN] No se pudo borrar {item}: {e}")
+        # Asegurarse de que el directorio existe (aunque no se borró, por si acaso)
         EMBEDDINGS_DIR.mkdir(parents=True, exist_ok=True)
 
     if not DOCS_DIR.exists():

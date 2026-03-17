@@ -779,8 +779,15 @@ def wrap_update_vector_store(force=False):
 async def reprocess_all(background_tasks: BackgroundTasks, admin_user: models.User = Depends(auth.check_admin_role)):
     """Borra el índice actual y reprocesa todo desde cero."""
     global is_indexing
+    print(f"[ADMIN] {admin_user.username} solicitó reprocesamiento total.")
     if is_indexing:
         return {"status": "already_indexing"}
+    
+    # Verificar si hay archivos antes de empezar
+    if not any(DOCS_DIR.rglob("*")):
+        print("[WARN] Intento de reprocesar sin archivos en docs/")
+        raise HTTPException(status_code=400, detail="No hay archivos en la carpeta de documentos para procesar.")
+
     background_tasks.add_task(wrap_update_vector_store, True)
     return {"status": "reprocessing_started"}
 
