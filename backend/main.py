@@ -38,6 +38,48 @@ create_initial_admin()
 
 load_dotenv()
 
+# --- REPARACIÓN DE BASE DE DATOS (MIGRACIÓN AUTOMÁTICA) ---
+def repair_database():
+    """Asegura que las columnas necesarias existan en el archivo SQLite."""
+    import sqlite3
+    db_file = Path(__file__).resolve().parent.parent / "data" / "documind.db"
+    if not db_file.exists():
+        return
+    
+    print(f"[DB] Verificando integridad de esquema en {db_file}...")
+    conn = sqlite3.connect(str(db_file))
+    cursor = conn.cursor()
+    
+    # Lista de (tabla, columna, tipo_y_defecto)
+    needed_columns = [
+        ("chats", "user_id", "INTEGER"),
+        ("chats", "area_id", "INTEGER"),
+        ("messages", "prompt_tokens", "INTEGER DEFAULT 0"),
+        ("messages", "completion_tokens", "INTEGER DEFAULT 0"),
+        ("users", "role", "VARCHAR DEFAULT 'viewer'"),
+        ("users", "full_name", "VARCHAR"),
+        ("users", "email", "VARCHAR"),
+        ("users", "is_active", "INTEGER DEFAULT 1"),
+        ("areas", "icon", "VARCHAR DEFAULT '📁'")
+    ]
+    
+    for table, col, col_type in needed_columns:
+        try:
+            cursor.execute(f"ALTER TABLE {table} ADD COLUMN {col} {col_type}")
+            print(f"[DB] Columna '{col}' añadida a tabla '{table}'.")
+        except sqlite3.OperationalError as e:
+            if "duplicate column name" not in str(e).lower():
+                print(f"[DB] Error al verificar '{col}' en '{table}': {e}")
+                
+    conn.commit()
+    conn.close()
+
+# Ejecutar reparaciones antes de que SQLAlchemy inicie
+try:
+    repair_database()
+except Exception as e:
+    print(f"[DB ERROR] Fallo en la reparación preventiva: {e}")
+
 app = FastAPI(title="RAG App API")
 
 # Estado global de indexación
@@ -782,7 +824,11 @@ async def read_index():
 
 @app.get("/favicon.ico", include_in_schema=False)
 async def favicon():
-    return FileResponse(FRONTEND_DIR / "favicon.ico") if (FRONTEND_DIR / "favicon.ico").exists() else None
+    from fastapi import Response
+    fav_path = FRONTEND_DIR / "favicon.ico"
+    if fav_path.exists():
+        return FileResponse(fav_path)
+    return Response(status_code=204)
 
 # Servir archivos estáticos (CSS, JS, Imágenes)
 app.mount("/", StaticFiles(directory=FRONTEND_DIR), name="frontend")
