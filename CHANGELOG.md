@@ -10,9 +10,14 @@ Decimotercera actualización enfocada en la robustez del despliegue en entornos 
 - **Auto-Reparación de DB**: Sistema de migración automática que detecta y crea columnas faltantes (`user_id`, `tokens`, `icon`) al arrancar el contenedor. Esto previene errores 500 tras actualizaciones de esquema.
 - **Dependencias Modernizadas**: Inclusión de `langchain-community` en `requirements.txt` para soportar las nuevas versiones modulares de LangChain.
 
+- **Monitoreo de Indexación**: Nueva barra de progreso visual en el frontend que reporta el porcentaje real de procesamiento de documentos (0-100%) a través de WebSockets/Polling.
+- **Optimización de Recuperación (Lidar)**: Ajustes en los pesos de búsqueda híbrida (FAISS + BM25) para mejorar la detección de software técnico específico como LidarIT y UAS-RPAS.
+
 ### Corregido
 - **Resiliencia de Despliegue**: Solucionado el error de construcción en Docker por falta de paquetes de la comunidad.
 - **Favicon Path**: Corrección de ruta en el servidor para evitar errores 500/502 al cargar la web en navegadores modernos.
+- **Reporte Visual**: Reparado el bug que dejaba la barra de carga en 0% durante el reprocesamiento masivo.
+- **Integridad de API**: Actualización del motor de embeddings para evitar fallos de cuota/pago (`402`).
 
 ## [1.5.1] - 2026-03-02
 ### v1.5.1 Economic Engine & Speed Boost

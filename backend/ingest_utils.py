@@ -115,8 +115,9 @@ def transcribe_audio(p: Path) -> str:
         print(f"Error transcribiendo {p.name}: {e}")
         return ""
 
-def update_vector_store(force_reprocess: bool = False):
+def update_vector_store(force_reprocess: bool = False, progress_callback=None):
     """Escanea la carpeta docs y regenera el índice FAISS. Si force_reprocess es True, borra el índice anterior."""
+    if progress_callback: progress_callback(5)
     if force_reprocess and EMBEDDINGS_DIR.exists():
         print("[INFO] Forzando reprocesamiento: Borrando índices antiguos...")
         import shutil
@@ -133,40 +134,53 @@ def update_vector_store(force_reprocess: bool = False):
 
     exts = {".txt", ".md", ".pdf", ".docx", ".html", ".htm", ".pptx", ".xlsx", ".mp3", ".mp4"}
 
-    print(f"[INFO] Iniciando vectorización de {len(list(DOCS_DIR.glob('*')))} archivos en {DOCS_DIR}...")
-    for path in DOCS_DIR.rglob("*"):
-        if not path.is_file(): continue
-        
+    all_docs = []
+    for p in DOCS_DIR.rglob("*"):
+        if p.is_file() and p.suffix.lower() in exts:
+            all_docs.append(p)
+    
+    total_files = len(all_docs)
+    print(f"[INFO] Iniciando vectorización de {total_files} archivos en {DOCS_DIR}...")
+    
+    for i, path in enumerate(all_docs):
         # Advertencia especial para .doc (formato viejo)
         if path.suffix.lower() == ".doc":
             print(f"   [!] ADVERTENCIA: {path.name} es un archivo .doc antiguo. Por favor, conviértelo a .docx para que el sistema pueda leerlo.")
             continue
 
-        if path.suffix.lower() in exts:
-            print(f"   [+] Procesando: {path.name}")
-            try:
-                raw = load_document(path)
-                if not raw or not raw.strip(): 
-                    print(f"   [!] Archivo vacío o no soportado: {path.name}")
-                    continue
-                area = path.parent.name if path.parent != DOCS_DIR else "General"
-                chunks = splitter.split_text(raw)
-                for ch in chunks:
-                    texts.append(f"Archivo: {path.name}\n{ch}")
-                    metadatas.append({
-                        "source": path.name,
-                        "area": area
-                    })
-            except Exception as e:
-                print(f"   [ERROR] Error procesando {path.name}: {e}")
+        print(f"   [+] Procesando ({i+1}/{total_files}): {path.name}")
+        try:
+            raw = load_document(path)
+            if not raw or not raw.strip(): 
+                print(f"   [!] Archivo vacío o no soportado: {path.name}")
+                continue
+            area = path.parent.name if path.parent != DOCS_DIR else "General"
+            chunks = splitter.split_text(raw)
+            for ch in chunks:
+                texts.append(f"Archivo: {path.name}\n{ch}")
+                metadatas.append({
+                    "source": path.name,
+                    "area": area
+                })
+        except Exception as e:
+            print(f"   [ERROR] Error procesando {path.name}: {e}")
+        
+        if progress_callback and total_files > 0:
+            # 5% a 70% para lectura de archivos
+            pct = 5 + int((i + 1) / total_files * 65)
+            progress_callback(pct)
 
     if not texts:
         print("[WARN] No se extrajo texto de ningún documento. El índice no se actualizará.")
         return
 
     print(f"[INFO] Generando embeddings para {len(texts)} fragmentos...")
+    if progress_callback: progress_callback(75)
+    
     embeddings = OpenAIEmbeddings()
     vs = FAISS.from_texts(texts, embeddings, metadatas=metadatas)
+    
+    if progress_callback: progress_callback(90)
     
     # Guardar índice FAISS
     EMBEDDINGS_DIR.mkdir(parents=True, exist_ok=True)
@@ -177,6 +191,7 @@ def update_vector_store(force_reprocess: bool = False):
     with open(EMBEDDINGS_DIR / "docs_chunks.pkl", "wb") as f:
         pickle.dump({"texts": texts, "metadatas": metadatas}, f)
         
+    if progress_callback: progress_callback(100)
     print(f"[OK] Índices vectoriales y de texto guardados con éxito en {EMBEDDINGS_DIR}")
 
 def get_hybrid_retriever(area: Optional[str] = None):

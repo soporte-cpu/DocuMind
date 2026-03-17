@@ -535,13 +535,21 @@ async function checkIndexingStatus() {
         const data = await res.json();
 
         if (data.is_indexing) {
+            const pct = data.progress || 0;
+            const bar = document.getElementById('progress-bar-fill');
+            const perc = document.getElementById('progress-percentage');
+            if (bar) bar.style.width = `${pct}%`;
+            if (perc) perc.innerText = `${pct}%`;
+            if (statusText) statusText.innerText = "Indexando documentos corporativos...";
+
             // Seguir esperando
             setTimeout(checkIndexingStatus, 2000);
         } else {
             // Finalizado
             statusText.innerText = "¡Todo listo! Índice actualizado.";
             barFill.style.width = '100%';
-            loadFilesForArea(currentArea.name);
+            document.getElementById('progress-percentage').innerText = '100%';
+            loadFilesForArea(currentArea?.name || "General");
 
             setTimeout(() => {
                 panel.style.display = 'none';
@@ -577,12 +585,14 @@ async function reprocessDocuments() {
     const panel = document.getElementById('upload-progress-panel');
     const statusText = document.getElementById('progress-status-text');
     const barFill = document.getElementById('progress-bar-fill');
-    const fileList = document.getElementById('upload-file-list');
+    const fileList = document.getElementById('progress-file-list');
 
     panel.style.display = 'block';
-    statusText.innerText = "Iniciando reprocesamiento integral...";
-    barFill.style.width = '10%';
-    fileList.innerHTML = '<li>Limpiando índices antiguos...</li>';
+    if (statusText) statusText.innerText = "Iniciando reprocesamiento integral...";
+    if (barFill) barFill.style.width = '10%';
+    const perc = document.getElementById('progress-percentage');
+    if (perc) perc.innerText = '10%';
+    if (fileList) fileList.innerHTML = '<li>🧹 Limpiando índices antiguos...</li>';
 
     try {
         const res = await authFetch(`${API_BASE}/reprocess`, { method: 'POST' });

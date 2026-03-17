@@ -84,6 +84,8 @@ app = FastAPI(title="RAG App API")
 
 # Estado global de indexación
 is_indexing = False
+indexing_lock = False
+indexing_progress = 0
 
 # Configurar CORS
 app.add_middleware(
@@ -744,30 +746,43 @@ async def delete_file(area: str, filename: str, admin_user: models.User = Depend
 
 @app.get("/indexing-status")
 async def get_indexing_status():
-    return {"is_indexing": is_indexing}
+    global is_indexing, indexing_progress
+    return {
+        "is_indexing": is_indexing,
+        "progress": indexing_progress
+    }
 
-def wrap_update_vector_store():
-    global is_indexing, indexing_lock
+def wrap_update_vector_store(force=False):
+    global is_indexing, indexing_lock, indexing_progress
     if indexing_lock:
         print("[SKIP] Indexación ya en curso, tarea omitida.")
         return
     
     indexing_lock = True
     is_indexing = True
+    indexing_progress = 0
     try:
-        update_vector_store()
+        def set_progress(p):
+            global indexing_progress
+            indexing_progress = p
+            print(f"[INDEX] Progreso: {p}%")
+            
+        update_vector_store(force_reprocess=force, progress_callback=set_progress)
+    except Exception as e:
+        print(f"[INDEX ERROR] Falló la indexación: {e}")
     finally:
         is_indexing = False
         indexing_lock = False
+        indexing_progress = 100
 
-@app.post("/index")
-async def trigger_indexing(background_tasks: BackgroundTasks, admin_user: models.User = Depends(auth.check_admin_role)):
-    """Inicia manualmente el proceso de indexación."""
+@app.post("/reprocess")
+async def reprocess_all(background_tasks: BackgroundTasks, admin_user: models.User = Depends(auth.check_admin_role)):
+    """Borra el índice actual y reprocesa todo desde cero."""
     global is_indexing
     if is_indexing:
         return {"status": "already_indexing"}
-    background_tasks.add_task(wrap_update_vector_store)
-    return {"status": "indexing_started"}
+    background_tasks.add_task(wrap_update_vector_store, True)
+    return {"status": "reprocessing_started"}
 
 @app.post("/upload")
 async def upload_file(background_tasks: BackgroundTasks, file: UploadFile = File(...), area: Optional[str] = None, subfolder: Optional[str] = None, admin_user: models.User = Depends(auth.check_admin_role)):
@@ -796,24 +811,14 @@ async def upload_file(background_tasks: BackgroundTasks, file: UploadFile = File
     
     return {"filename": file.filename, "status": "uploaded"}
 
-@app.post("/reprocess")
-async def reprocess_docs(background_tasks: BackgroundTasks, current_user: models.User = Depends(auth.check_admin_role)):
-    """Borra el índice actual y reprocesa todos los documentos físicamente."""
+@app.post("/index")
+async def trigger_indexing(background_tasks: BackgroundTasks, admin_user: models.User = Depends(auth.check_admin_role)):
+    """Inicia el proceso de indexación de los documentos actuales."""
     global is_indexing
     if is_indexing:
-        raise HTTPException(status_code=400, detail="Ya se está realizando una indexación.")
-    
-    is_indexing = True
-    
-    def run_reprocess():
-        global is_indexing
-        try:
-            update_vector_store(force_reprocess=True)
-        finally:
-            is_indexing = False
-            
-    background_tasks.add_task(run_reprocess)
-    return {"message": "Reprocesamiento total iniciado en segundo plano."}
+        return {"status": "already_indexing"}
+    background_tasks.add_task(wrap_update_vector_store, False)
+    return {"status": "indexing_started"}
 
 # Rutas para el Frontend
 FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
