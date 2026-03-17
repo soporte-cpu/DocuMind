@@ -779,18 +779,24 @@ function appendMessage(role, content, isLoading = false, sources = [], usage = n
         sourcesHtml += `</div>`;
     }
 
-    // Configurar Marked para renderizar Markdown (con fallback de seguridad)
-    let renderedContent = content.replace(/\n/g, '<br>');
+    // Configurar Marked para renderizar Markdown
+    let renderedContent = content;
     if (role === 'assistant' && !isLoading) {
         try {
-            if (typeof marked !== 'undefined' && marked.parse) {
+            if (typeof marked !== 'undefined') {
+                // Configurar opciones de marked si es necesario
+                marked.setOptions({
+                    breaks: true,
+                    gfm: true
+                });
                 renderedContent = marked.parse(content);
-            } else if (typeof marked === 'function') {
-                renderedContent = marked(content);
             }
         } catch (e) {
             console.warn("Markdown parse failed, using text fallback");
+            renderedContent = content.replace(/\n/g, '<br>');
         }
+    } else {
+        renderedContent = content.replace(/\n/g, '<br>');
     }
 
     msgDiv.innerHTML = `
@@ -809,13 +815,29 @@ function appendMessage(role, content, isLoading = false, sources = [], usage = n
     if (role === 'assistant' && !isLoading && content.includes('```mermaid')) {
         setTimeout(async () => {
             try {
-                await mermaid.run({
-                    nodes: msgDiv.querySelectorAll('.language-mermaid')
-                });
+                // Convertir bloques de código language-mermaid a div.mermaid para mejor renderizado
+                const codeBlocks = msgDiv.querySelectorAll('.language-mermaid');
+                for (const block of codeBlocks) {
+                    const pre = block.parentElement;
+                    const container = document.createElement('div');
+                    container.className = 'mermaid';
+                    container.textContent = block.textContent;
+                    if (pre && pre.tagName === 'PRE') {
+                        pre.parentNode.replaceChild(container, pre);
+                    } else {
+                        block.parentNode.replaceChild(container, block);
+                    }
+                }
+
+                if (typeof mermaid !== 'undefined') {
+                    await mermaid.run({
+                        nodes: msgDiv.querySelectorAll('.mermaid')
+                    });
+                }
             } catch (e) {
                 console.error("Mermaid check fail:", e);
             }
-        }, 100);
+        }, 150);
     }
 
     return msgDiv;

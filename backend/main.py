@@ -339,7 +339,7 @@ async def chat(request: QueryRequest, db: Session = Depends(get_db), current_use
            graph TD
            ... lógica del diagrama ...
            ```
-           NO menciones la palabra 'Mermaid' al usuario, solo di: "Aquí tienes el diagrama del proceso:".
+           IMPORTANTE (SINTAXIS): Asegúrate de que los nombres de los nodos no tengan caracteres especiales prohibidos. Si el texto del nodo tiene espacios o símbolos como () [] / &, ponlo siempre entre comillas, ejemplo: id1["Texto (con símbolos)"]. NO menciones la palabra 'Mermaid' al usuario, solo di: "Aquí tienes el diagrama del proceso:".
 
         Área Actual: {area_name}
 
