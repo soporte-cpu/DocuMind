@@ -2,6 +2,19 @@
 
 Todas las modificaciones notables de este proyecto se documentarán en este archivo.
 
+## [1.5.3] - 2026-03-18
+### v1.5.3 Documentation & UI Refinement
+Decimocuarta actualización enfocada en la transparencia técnica y el pulido estético de los controles administrativos.
+
+### Añadido
+- **Documentación "Deep-Dive"**: Creación de `ARCHITECTURE.md`, un manual técnico detallado sobre el motor RAG Híbrido, y `.env.example` para facilitar la configuración inicial.
+- **Transparencia de Acceso**: El `README.md` ahora documenta explícitamente las credenciales administrativas por defecto (`admin`/`admin`).
+
+### Mejoras (UI/UX)
+- **Modales Adaptativos**: Implementación de tamaños dinámicos para ventanas emergentes (`sm`, `md`, `lg`) para evitar la distorsión visual en pantallas grandes.
+- **Refinamiento de Control**: Rediseño de los campos de entrada (`inputs` y `selects`) con bordes más finos (1px) y radios de curvatura optimizados para una estética "Professional Enterprise".
+- **Estructura de Formularios**: Nueva arquitectura interna para modales simplificados con encabezados y cuerpos con padding balanceado.
+
 ## [1.5.2] - 2026-03-17
 ### v1.5.2 Deployment Resilience & Auto-Migration
 Decimotercera actualización enfocada en la robustez del despliegue en entornos Docker y la integridad de la base de datos.

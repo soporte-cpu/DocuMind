@@ -268,40 +268,43 @@
 
     <!-- Modal User (Crear/Editar) -->
     <div class="modal-bg" id="user-modal">
-        <div class="modal-card">
-            <h3 id="user-modal-title">Gestión de Usuario</h3>
-            <input type="hidden" id="user-id-edit">
-            <div class="form-group">
-                <label>Nombre Completo</label>
-                <input type="text" id="user-fullname-input" placeholder="Ej: Juan Pérez">
+        <div class="modal-card modal-md">
+            <div class="modal-header-simple">
+                <h3 id="user-modal-title">Gestión de Usuario</h3>
             </div>
-            <div class="form-group">
-                <label>Nombre de Usuario</label>
-                <input type="text" id="user-name-input" placeholder="usuario123">
-            </div>
-            <div class="form-group">
-                <label>Email</label>
-                <input type="email" id="user-email-input" placeholder="user@empresa.com">
-            </div>
-            <div class="form-group" id="pwd-field-container">
-                <label>Contraseña</label>
-                <input type="password" id="user-pass-input" placeholder="••••••••">
-            </div>
-            <div style="display: flex; gap: 20px;">
-                <div class="form-group" style="flex: 1;">
-                    <label>Rol</label>
-                    <select id="user-role-input" class="professional-select"
-                        style="background:#f1f5f9; color:black; border:1px solid var(--border); width:100%;">
-                        <option value="viewer">Viewer (Lectura)</option>
-                        <option value="admin">Admin (Total)</option>
-                    </select>
+            <div class="modal-body-simple">
+                <input type="hidden" id="user-id-edit">
+                <div class="form-group">
+                    <label>Nombre Completo</label>
+                    <input type="text" id="user-fullname-input" placeholder="Ej: Juan Pérez">
                 </div>
-                <div class="form-group" style="flex: 1;">
-                    <label>Estado</label>
-                    <div style="display: flex; align-items: center; gap: 10px; margin-top: 5px;">
-                        <input type="checkbox" id="user-active-input" checked
-                            style="width: 20px; height: 20px; cursor: pointer;">
-                        <span style="font-size: 0.9rem;">Activo</span>
+                <div class="form-group">
+                    <label>Nombre de Usuario</label>
+                    <input type="text" id="user-name-input" placeholder="usuario123">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="user-email-input" placeholder="user@empresa.com">
+                </div>
+                <div class="form-group" id="pwd-field-container">
+                    <label>Contraseña</label>
+                    <input type="password" id="user-pass-input" placeholder="••••••••">
+                </div>
+                <div style="display: flex; gap: 20px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Rol</label>
+                        <select id="user-role-input">
+                            <option value="viewer">Viewer (Lectura)</option>
+                            <option value="admin">Admin (Total)</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Estado</label>
+                        <div style="display: flex; align-items: center; gap: 10px; margin-top: 5px;">
+                            <input type="checkbox" id="user-active-input" checked
+                                style="width: 20px; height: 20px; cursor: pointer;">
+                            <span style="font-size: 0.9rem;">Activo</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -314,13 +317,17 @@
 
     <!-- Modal Cambio Password -->
     <div class="modal-bg" id="password-modal">
-        <div class="modal-card">
-            <h3>Cambiar Contraseña</h3>
-            <p class="text-muted" id="pwd-user-target" style="margin-bottom:20px; font-size:0.9rem;"></p>
-            <input type="hidden" id="pwd-user-id">
-            <div class="form-group">
-                <label>Nueva Contraseña</label>
-                <input type="password" id="new-password-input" placeholder="••••••••">
+        <div class="modal-card modal-sm">
+            <div class="modal-header-simple">
+                <h3>Cambiar Contraseña</h3>
+            </div>
+            <div class="modal-body-simple">
+                <p class="text-muted" id="pwd-user-target" style="font-size:0.9rem;"></p>
+                <input type="hidden" id="pwd-user-id">
+                <div class="form-group">
+                    <label>Nueva Contraseña</label>
+                    <input type="password" id="new-password-input" placeholder="••••••••">
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn-ghost"
@@ -330,17 +337,21 @@
         </div>
     </div>
 
-    <!-- Modal -->
+    <!-- Modal Área -->
     <div class="modal-bg" id="area-modal">
-        <div class="modal-card">
-            <h3 id="area-modal-title">Gestión de Área</h3>
-            <div class="form-group">
-                <label>Nombre</label>
-                <input type="text" id="area-name-input">
+        <div class="modal-card modal-sm">
+            <div class="modal-header-simple">
+                <h3 id="area-modal-title">Gestión de Área</h3>
             </div>
-            <div class="form-group">
-                <label>Icono (Emoji)</label>
-                <input type="text" id="area-icon-input" value="📁">
+            <div class="modal-body-simple">
+                <div class="form-group">
+                    <label>Nombre</label>
+                    <input type="text" id="area-name-input">
+                </div>
+                <div class="form-group">
+                    <label>Icono (Emoji)</label>
+                    <input type="text" id="area-icon-input" value="📁">
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn-ghost" onclick="closeAreaModal()">Cancelar</button>

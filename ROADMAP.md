@@ -29,7 +29,7 @@ Transformar DocuMind en una herramienta que permita a las empresas subir estánd
 
 ---
 
-## 📅 Próximo Sprint (Versión 1.4.0)
+## 📅 Sprint Actual (Versión 1.5.3)
 
 | Tarea | Detalle | Estado |
 | :--- | :--- | :--- |

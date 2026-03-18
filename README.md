@@ -1,4 +1,4 @@
-# DocuMind Enterprise v1.5.2 🚀
+# DocuMind Enterprise v1.5.3 🚀
 
 DocuMind Enterprise es una plataforma de gestión documental inteligente potenciada por Inteligencia Artificial y arquitectura RAG (Retrieval-Augmented Generation). Permite organizar documentos por áreas, realizar búsquedas híbridas (semántica + técnica) y chatear con los documentos para obtener respuestas precisas y profesionales con citación verificable.
 
@@ -6,7 +6,14 @@ DocuMind Enterprise es una plataforma de gestión documental inteligente potenci
 
 ### 🗺️ Visión Estratégica y Progreso
 *   **[Ver Hoja de Ruta (ROADMAP.md)](./ROADMAP.md)** - Explora los planes para la v2.0 "Compliance Engine".
-*   **[Historial de Cambios (CHANGELOG.md)](./CHANGELOG.md)** - Revisa las últimas mejoras de la v1.5.1.
+*   **[Historial de Cambios (CHANGELOG.md)](./CHANGELOG.md)** - Revisa las últimas mejoras de la v1.5.3.
+*   **[Arquitectura del Sistema (ARCHITECTURE.md)](./ARCHITECTURE.md)** - Detalles técnicos del motor RAG Híbrido.
+*   **[Configuración (.env.example)](./.env.example)** - Plantilla para variables de entorno.
+
+⚠️ **Acceso Preconfigurado**:
+El sistema incluye un usuario administrador inicial:
+- **Usuario**: `admin`
+- **Contraseña**: `admin`
 
 ---
 
@@ -23,9 +30,10 @@ DocuMind Enterprise es una plataforma de gestión documental inteligente potenci
 - **Filtro de Relevancia Quirúrgico**: Eliminación automática de fuentes irrelevantes (ruido) para mayor precisión.
 
 ### 🎨 Experiencia de Usuario Élite
+- **UI Refinement**: Rediseño de modales administrativos con tamaños adaptativos (`sm`, `md`) para una ergonomía visual impecable.
+- **Controles Profesionales**: Campos de entrada con bordes finos (1px) y sombras sutiles que aportan una estética Enterprise premium.
 - **Chat Asimétrico**: Diseño estilo mensajería moderna con mensajes de usuario a la derecha y respuestas de la IA a la izquierda.
-- **Descargas Seguras Universales**: Sistema infalible de descarga de archivos originales mediante validación dual (Token URL + Header).
-- **Login Premium Restaurado**: Interfaz de acceso profesional, equilibrada y moderna.
+- **Descargas Seguras Universales**: Sistema infalible mediante validación dual (Token URL + Header).
 
 ### 🧠 Inteligencia Artificial y RAG
 - **Búsqueda Híbrida**: FAISS (Vectores) + BM25 (Palabras clave) para una precisión técnica sin igual.
@@ -72,4 +80,4 @@ documind-enterprise/
 ```
 
 ---
-*Desarrollado con pasión por **Juan Pablo Erices** & Antigravity AI - v1.5.1 Speed Edition*
+*Desarrollado con pasión por **Juan Pablo Erices** & Antigravity AI - v1.5.3 Speed Edition*

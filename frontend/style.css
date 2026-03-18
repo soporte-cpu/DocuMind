@@ -74,21 +74,24 @@ body {
     letter-spacing: 0.05em;
 }
 
-.form-group input {
+.form-group input,
+.form-group select {
     width: 100%;
-    padding: 16px 20px;
-    border: 1.5px solid #e2e8f0;
-    border-radius: 14px;
+    padding: 13px 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
     outline: none;
     background: #f8fafc;
-    font-size: 1rem;
+    font-size: 0.95rem;
     transition: all 0.2s ease;
+    color: #1e293b;
 }
 
-.form-group input:focus {
+.form-group input:focus,
+.form-group select:focus {
     border-color: var(--primary);
     background: white;
-    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
 }
 
 .login-card .logo-wrapper.large {
@@ -1138,17 +1141,44 @@ textarea#user-input {
    ========================================= */
 .modal-card {
     background: white;
-    width: 100%;
+    width: 95%;
     max-width: 950px;
     padding: 0;
-    /* Quitamos padding general para control total */
-    border-radius: 28px;
-    box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.3);
-    max-height: 85vh;
+    border-radius: 24px;
+    box-shadow: 0 32px 64px -16px rgba(15, 23, 42, 0.25);
+    max-height: 90vh;
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    /* El scroll será interno */
+}
+
+.modal-md {
+    max-width: 600px !important;
+}
+
+.modal-sm {
+    max-width: 450px !important;
+}
+
+.modal-header-simple {
+    padding: 24px 32px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+}
+
+.modal-header-simple h3 {
+    font-size: 1.3rem;
+    font-weight: 800;
+    font-family: 'Outfit';
+    color: #0f172a;
+}
+
+.modal-body-simple {
+    padding: 32px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
 .modal-header-pro {
@@ -1938,7 +1968,9 @@ body:not(.is-admin) .is-admin-only {
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 
-.usage-list { margin-top: 20px; }
+.usage-list {
+    margin-top: 20px;
+}
 
 .user-usage-item {
     display: flex;
@@ -1948,9 +1980,15 @@ body:not(.is-admin) .is-admin-only {
     border-bottom: 1px solid #f1f5f9;
 }
 
-.user-usage-item:last-child { border-bottom: none; }
+.user-usage-item:last-child {
+    border-bottom: none;
+}
 
-.user-usage-info { display: flex; align-items: center; gap: 12px; }
+.user-usage-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
 
 .user-usage-avatar {
     width: 32px;
@@ -1964,7 +2002,9 @@ body:not(.is-admin) .is-admin-only {
     font-weight: 700;
 }
 
-.service-item { margin-top: 24px; }
+.service-item {
+    margin-top: 24px;
+}
 
 .service-bar-container {
     height: 10px;
